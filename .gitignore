@@ -28,7 +28,10 @@ data/*
 
 # HuggingFace 模型缓存
 cache/
-models/
+/models/
+
+# 保留 backend/models/ 目录下的 Python 模块
+!backend/models/
 
 # Editor directories and files
 .vscode/*

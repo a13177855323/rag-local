@@ -4,7 +4,9 @@ from backend.config import settings
 from backend.models.embedding_model import EmbeddingModel
 from backend.models.llm_model import LLMModel
 from backend.services.vector_store import VectorStore
+from backend.services.code_rag_service import get_code_rag_service
 from backend.utils.document_processor import DocumentProcessor
+from backend.utils.code_detector import get_code_detector
 
 class RAGService:
     _instance = None
@@ -21,6 +23,8 @@ class RAGService:
         self.llm_model = LLMModel()
         self.vector_store = VectorStore()
         self.document_processor = DocumentProcessor()
+        self.code_rag_service = get_code_rag_service()
+        self.code_detector = get_code_detector()
 
     def ingest_document(self, file_path: str) -> Dict:
         """处理并导入单个文档"""
@@ -55,11 +59,31 @@ class RAGService:
             results.append(result)
         return results
 
-    def query(self, question: str, top_k: int = None, stream: bool = False):
-        """查询知识库"""
+    def query(self, question: str, top_k: int = None, stream: bool = False, code_mode: bool = False):
+        """
+        查询知识库
+
+        Args:
+            question: 用户问题
+            top_k: 返回结果数量
+            stream: 是否流式输出
+            code_mode: 强制代码模式（自动检测代码问题时为True）
+        """
         if top_k is None:
             top_k = settings.TOP_K
 
+        # 检测是否为代码相关问题
+        is_code_query = self.code_detector.is_code_query(question) or code_mode
+
+        # 如果是代码问题，使用代码RAG服务
+        if is_code_query:
+            return self.code_rag_service.query_code(
+                question=question,
+                top_k=top_k,
+                stream=stream
+            )
+
+        # 普通查询流程
         # 生成查询嵌入
         query_embedding = self.embedding_model.embed_query(question)
 
@@ -72,21 +96,22 @@ class RAGService:
             {
                 "filename": doc.get("metadata", {}).get("filename", ""),
                 "content": doc.get("content", "")[:200],  # 只返回前200字符作为预览
-                "similarity": float(score)
+                "similarity": float(score),
+                "is_code": False,
+                "language": None
             } for doc, score in search_results
         ]
 
         if not context:
+            result = {
+                "answer": "知识库中没有找到相关文档，请先上传文档。",
+                "sources": [],
+                "is_code_query": False
+            }
             if stream:
-                yield {
-                    "answer": "知识库中没有找到相关文档，请先上传文档。",
-                    "sources": []
-                }
+                yield result
             else:
-                return {
-                    "answer": "知识库中没有找到相关文档，请先上传文档。",
-                    "sources": []
-                }
+                return result
             return
 
         # 生成回答
@@ -99,20 +124,41 @@ class RAGService:
                     yield {
                         "answer": chunk,
                         "done": False,
-                        "sources": sources
+                        "sources": sources,
+                        "is_code_query": False
                     }
                 yield {
                     "answer": "",
                     "done": True,
-                    "sources": sources
+                    "sources": sources,
+                    "is_code_query": False
                 }
             return stream_response()
         else:
             answer = self.llm_model.generate(question, context)
             return {
                 "answer": answer,
-                "sources": sources
+                "sources": sources,
+                "is_code_query": False
             }
+
+    def query_code(self, question: str, top_k: int = None, stream: bool = False):
+        """
+        专门用于代码问答的接口
+
+        Args:
+            question: 代码相关问题
+            top_k: 返回结果数量
+            stream: 是否流式输出
+
+        Returns:
+            代码问答结果
+        """
+        return self.code_rag_service.query_code(
+            question=question,
+            top_k=top_k,
+            stream=stream
+        )
 
     def get_document_list(self) -> List[str]:
         """获取已上传的文档列表"""

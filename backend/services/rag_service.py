@@ -1,10 +1,41 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple, Optional
 import os
 from backend.config import settings
 from backend.models.embedding_model import EmbeddingModel
 from backend.models.llm_model import LLMModel
 from backend.services.vector_store import VectorStore
 from backend.utils.document_processor import DocumentProcessor
+from backend.utils.code_detector import CodeDetector, detect_code_question
+from backend.utils.code_formatter import (
+    CodeFormatter, FormattedCodeResult, build_code_prompt
+)
+
+
+class HybridSearchResult:
+    def __init__(self):
+        self.code_results: List[Tuple[Dict, float]] = []
+        self.text_results: List[Tuple[Dict, float]] = []
+        self.merged_results: List[Tuple[Dict, float]] = []
+
+    def get_context(self) -> List[str]:
+        return [doc.get("content", "") for doc, _ in self.merged_results]
+
+    def get_code_blocks(self) -> List[FormattedCodeResult]:
+        results = []
+        for doc, score in self.code_results:
+            code_content = doc.get("code_content", "")
+            if not code_content:
+                code_content = doc.get("content", "")
+            filename = doc.get("metadata", {}).get("filename", "unknown")
+            results.append(FormattedCodeResult(
+                code=code_content,
+                language="python",
+                description="",
+                source_file=filename,
+                similarity=round(score, 4)
+            ))
+        return results
+
 
 class RAGService:
     _instance = None
@@ -21,6 +52,8 @@ class RAGService:
         self.llm_model = LLMModel()
         self.vector_store = VectorStore()
         self.document_processor = DocumentProcessor()
+        self.code_detector = CodeDetector()
+        self.code_formatter = CodeFormatter()
 
     def ingest_document(self, file_path: str) -> Dict:
         """处理并导入单个文档"""
@@ -55,63 +88,170 @@ class RAGService:
             results.append(result)
         return results
 
-    def query(self, question: str, top_k: int = None, stream: bool = False):
-        """查询知识库"""
+    def _hybrid_search(
+        self,
+        query_embedding,
+        question: str,
+        top_k: int = None,
+        is_code_question: bool = False
+    ) -> HybridSearchResult:
+        """混合检索策略：代码块优先 + 文本补充"""
         if top_k is None:
             top_k = settings.TOP_K
 
-        # 生成查询嵌入
+        result = HybridSearchResult()
+        all_docs = self.vector_store.get_all_documents()
+
+        if not all_docs:
+            return result
+
+        search_results = self.vector_store.search(query_embedding, top_k * 2)
+
+        if is_code_question:
+            code_top_k = settings.CODE_SEARCH_TOP_K
+            code_results = []
+            text_results = []
+
+            for doc, score in search_results:
+                metadata = doc.get("metadata", {})
+                has_code = metadata.get("has_code", False)
+                is_code_chunk = metadata.get("is_code_chunk", False)
+
+                if has_code or is_code_chunk:
+                    boosted_score = score * settings.CODE_BOOST_FACTOR
+                    code_results.append((doc, boosted_score))
+                else:
+                    text_results.append((doc, score))
+
+            code_results = sorted(code_results, key=lambda x: x[1], reverse=True)[:code_top_k]
+            text_results = text_results[:top_k - len(code_results)]
+
+            result.code_results = code_results
+            result.text_results = text_results
+            result.merged_results = code_results + text_results
+        else:
+            result.merged_results = search_results[:top_k]
+            for doc, score in result.merged_results:
+                if doc.get("metadata", {}).get("has_code", False):
+                    result.code_results.append((doc, score))
+                else:
+                    result.text_results.append((doc, score))
+
+        return result
+
+    def _build_enhanced_prompt(
+        self,
+        question: str,
+        search_result: HybridSearchResult,
+        is_code_question: bool
+    ) -> str:
+        """构建增强的提示词"""
+        if is_code_question and search_result.code_results:
+            code_blocks = search_result.get_code_blocks()
+            text_context = [doc.get("content", "") for doc, _ in search_result.text_results[:2]]
+            return build_code_prompt(question, code_blocks, text_context)
+        else:
+            context = search_result.get_context()
+            return None
+
+    def query(self, question: str, top_k: int = None, stream: bool = False):
+        """查询知识库（支持代码智能检索）"""
+        if top_k is None:
+            top_k = settings.TOP_K
+
+        is_code_question = False
+        code_confidence = 0.0
+
+        if settings.ENABLE_CODE_DETECTION:
+            is_code_question, code_confidence = detect_code_question(question)
+            is_code_question = is_code_question and code_confidence >= settings.CODE_CONFIDENCE_THRESHOLD
+
         query_embedding = self.embedding_model.embed_query(question)
 
-        # 搜索相关文档
-        search_results = self.vector_store.search(query_embedding, top_k)
+        search_result = self._hybrid_search(query_embedding, question, top_k, is_code_question)
 
-        # 提取上下文
-        context = [doc.get("content", "") for doc, score in search_results]
-        sources = [
-            {
+        context = search_result.get_context()
+
+        sources = []
+        for doc, score in search_result.merged_results:
+            metadata = doc.get("metadata", {})
+            source = {
+                "filename": metadata.get("filename", ""),
+                "content": doc.get("content", "")[:200],
+                "similarity": float(score),
+                "has_code": metadata.get("has_code", False),
+                "is_code_chunk": metadata.get("is_code_chunk", False)
+            }
+            if metadata.get("has_code", False):
+                source["code_languages"] = metadata.get("code_languages", [])
+            sources.append(source)
+
+        code_sources = []
+        for doc, score in search_result.code_results:
+            code_sources.append({
                 "filename": doc.get("metadata", {}).get("filename", ""),
-                "content": doc.get("content", "")[:200],  # 只返回前200字符作为预览
+                "code": doc.get("code_content", "") or doc.get("content", ""),
                 "similarity": float(score)
-            } for doc, score in search_results
-        ]
+            })
 
         if not context:
             if stream:
                 yield {
                     "answer": "知识库中没有找到相关文档，请先上传文档。",
-                    "sources": []
+                    "sources": [],
+                    "code_results": [],
+                    "is_code_question": is_code_question
                 }
             else:
                 return {
                     "answer": "知识库中没有找到相关文档，请先上传文档。",
-                    "sources": []
+                    "sources": [],
+                    "code_results": [],
+                    "is_code_question": is_code_question
                 }
             return
 
-        # 生成回答
+        enhanced_prompt = self._build_enhanced_prompt(question, search_result, is_code_question)
+
         if stream:
-            # 流式输出
             def stream_response():
-                full_response = ""
-                for chunk in self.llm_model.generate_stream(question, context):
-                    full_response += chunk
-                    yield {
-                        "answer": chunk,
-                        "done": False,
-                        "sources": sources
-                    }
+                if enhanced_prompt:
+                    for chunk in self.llm_model.generate_stream(enhanced_prompt, context):
+                        yield {
+                            "answer": chunk,
+                            "done": False,
+                            "sources": sources,
+                            "code_results": code_sources,
+                            "is_code_question": is_code_question
+                        }
+                else:
+                    for chunk in self.llm_model.generate_stream(question, context):
+                        yield {
+                            "answer": chunk,
+                            "done": False,
+                            "sources": sources,
+                            "code_results": code_sources,
+                            "is_code_question": is_code_question
+                        }
                 yield {
                     "answer": "",
                     "done": True,
-                    "sources": sources
+                    "sources": sources,
+                    "code_results": code_sources,
+                    "is_code_question": is_code_question
                 }
             return stream_response()
         else:
-            answer = self.llm_model.generate(question, context)
+            if enhanced_prompt:
+                answer = self.llm_model.generate(enhanced_prompt, context)
+            else:
+                answer = self.llm_model.generate(question, context)
             return {
                 "answer": answer,
-                "sources": sources
+                "sources": sources,
+                "code_results": code_sources,
+                "is_code_question": is_code_question,
+                "code_confidence": code_confidence if settings.ENABLE_CODE_DETECTION else 0.0
             }
 
     def get_document_list(self) -> List[str]:

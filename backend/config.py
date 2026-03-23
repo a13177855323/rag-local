@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     MAX_TOKENS: int = 2048
     TEMPERATURE: float = 0.7
 
+    # 对话历史配置
+    ENABLE_CONVERSATION_HISTORY: bool = True
+    CONVERSATION_AUTO_ANALYZE: bool = True
+    CONVERSATION_EXPORT_DIR: str = "./data/exports"
+    MAX_HISTORY_SESSIONS: int = 30
+
     # 文件存储配置
     UPLOAD_DIR: str = "./data/uploads"
     MAX_FILE_SIZE: int = 50 * 1024 * 1024

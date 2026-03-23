@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Body
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Optional
@@ -14,6 +14,10 @@ class QueryRequest(BaseModel):
     question: str
     top_k: Optional[int] = None
     stream: Optional[bool] = False
+    enable_code_rag: Optional[bool] = True
+
+class CodeDetectRequest(BaseModel):
+    content: str
 
 class DeleteRequest(BaseModel):
     filename: str
@@ -67,7 +71,8 @@ async def query(request: QueryRequest):
     result = rag_service.query(
         question=request.question,
         top_k=request.top_k,
-        stream=False
+        stream=False,
+        enable_code_rag=request.enable_code_rag
     )
     return result
 
@@ -80,7 +85,8 @@ async def query_stream(request: QueryRequest):
     stream_generator = rag_service.query(
         question=request.question,
         top_k=request.top_k,
-        stream=True
+        stream=True,
+        enable_code_rag=request.enable_code_rag
     )
     
     return StreamingResponse(
@@ -120,3 +126,54 @@ async def clear_knowledge_base():
 async def health_check():
     """健康检查"""
     return {"status": "healthy", "message": "RAG系统运行正常"}
+
+@router.post("/code/query")
+async def code_query(request: QueryRequest):
+    """代码专属查询接口 - 专门用于代码相关问题"""
+    if not request.question.strip():
+        raise HTTPException(status_code=400, detail="问题不能为空")
+    
+    result = rag_service.code_query(
+        question=request.question,
+        top_k=request.top_k,
+        stream=False
+    )
+    return result
+
+@router.post("/code/query/stream")
+async def code_query_stream(request: QueryRequest):
+    """代码专属流式查询接口"""
+    if not request.question.strip():
+        raise HTTPException(status_code=400, detail="问题不能为空")
+    
+    stream_generator = rag_service.code_query(
+        question=request.question,
+        top_k=request.top_k,
+        stream=True
+    )
+    
+    return StreamingResponse(
+        stream_generator,
+        media_type="text/event-stream"
+    )
+
+@router.post("/code/detect")
+async def detect_code(request: CodeDetectRequest):
+    """检测文本中是否包含Python代码"""
+    if not request.content.strip():
+        raise HTTPException(status_code=400, detail="内容不能为空")
+    
+    result = rag_service.detect_code_in_document(request.content)
+    return result
+
+@router.get("/code/check-question")
+async def check_code_question(question: str):
+    """检测问题是否与代码相关"""
+    if not question.strip():
+        raise HTTPException(status_code=400, detail="问题不能为空")
+    
+    is_code = rag_service.code_rag_handler.is_code_question(question)
+    return {
+        "is_code_question": is_code,
+        "question": question
+    }

@@ -30,6 +30,12 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./data/uploads"
     MAX_FILE_SIZE: int = 50 * 1024 * 1024
 
+    # 对话历史配置
+    ENABLE_CONVERSATION_HISTORY: bool = True
+    CONVERSATION_STORAGE_DIR: str = "./data/conversations"
+    CONVERSATION_AUTO_ANALYZE: bool = True
+    MAX_HISTORY_SESSIONS: int = 30
+
     class Config:
         env_file = ".env"
 

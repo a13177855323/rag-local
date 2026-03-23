@@ -14,9 +14,18 @@ class QueryRequest(BaseModel):
     question: str
     top_k: Optional[int] = None
     stream: Optional[bool] = False
+    session_id: Optional[str] = None
 
 class DeleteRequest(BaseModel):
     filename: str
+
+class CreateSessionRequest(BaseModel):
+    title: Optional[str] = None
+
+class ExportRequest(BaseModel):
+    session_ids: Optional[List[str]] = None
+    export_format: str = "json"
+    with_analysis: Optional[bool] = True
 
 @router.post("/upload")
 async def upload_file(files: List[UploadFile] = File(...)):
@@ -67,7 +76,8 @@ async def query(request: QueryRequest):
     result = rag_service.query(
         question=request.question,
         top_k=request.top_k,
-        stream=False
+        stream=False,
+        session_id=request.session_id
     )
     return result
 
@@ -80,7 +90,8 @@ async def query_stream(request: QueryRequest):
     stream_generator = rag_service.query(
         question=request.question,
         top_k=request.top_k,
-        stream=True
+        stream=True,
+        session_id=request.session_id
     )
     
     return StreamingResponse(
@@ -120,3 +131,89 @@ async def clear_knowledge_base():
 async def health_check():
     """健康检查"""
     return {"status": "healthy", "message": "RAG系统运行正常"}
+
+# ==================== 对话历史管理接口 ====================
+
+@router.post("/chat/sessions")
+async def create_chat_session(request: CreateSessionRequest = None):
+    """创建新的对话会话"""
+    title = request.title if request else None
+    result = rag_service.create_chat_session(title)
+    return result
+
+@router.get("/chat/sessions")
+async def get_chat_sessions(limit: int = None):
+    """获取所有对话会话列表"""
+    sessions = rag_service.get_all_chat_sessions(limit)
+    return {
+        "success": True,
+        "total": len(sessions),
+        "sessions": sessions
+    }
+
+@router.get("/chat/sessions/{session_id}")
+async def get_chat_session(session_id: str):
+    """获取指定会话详情"""
+    session = rag_service.get_chat_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="会话不存在")
+    return {"success": True, "session": session}
+
+@router.delete("/chat/sessions/{session_id}")
+async def delete_chat_session(session_id: str):
+    """删除指定会话"""
+    result = rag_service.delete_chat_session(session_id)
+    if not result["success"]:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
+
+@router.delete("/chat/clear")
+async def clear_chat_history():
+    """清空所有对话历史"""
+    result = rag_service.clear_chat_history()
+    return result
+
+@router.get("/chat/sessions/{session_id}/analyze")
+async def analyze_chat_session(session_id: str):
+    """智能分析指定对话会话"""
+    analysis = rag_service.analyze_chat_session(session_id)
+    if analysis is None:
+        raise HTTPException(status_code=404, detail="会话不存在")
+    return {
+        "success": True,
+        "session_id": session_id,
+        "analysis": analysis
+    }
+
+@router.get("/chat/stats")
+async def get_chat_stats():
+    """获取对话历史整体统计"""
+    stats = rag_service.get_chat_stats()
+    return {
+        "success": True,
+        "stats": stats
+    }
+
+@router.post("/chat/export")
+async def export_chat_history(request: ExportRequest):
+    """导出对话历史
+    
+    支持格式: json, markdown, csv
+    """
+    valid_formats = ['json', 'markdown', 'csv']
+    if request.export_format not in valid_formats:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"不支持的导出格式，支持格式: {', '.join(valid_formats)}"
+        )
+    
+    result = rag_service.export_chat_history(
+        session_ids=request.session_ids,
+        export_format=request.export_format,
+        with_analysis=request.with_analysis
+    )
+    
+    if not result["success"]:
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    return result

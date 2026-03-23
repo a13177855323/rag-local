@@ -1,19 +1,26 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi.responses import StreamingResponse, PlainTextResponse, JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import os
 import shutil
+import json
 from backend.config import settings
 from backend.services.rag_service import RAGService
+from backend.services.conversation_analyzer import get_conversation_analyzer
 
 router = APIRouter(prefix="/api", tags=["RAG"])
 rag_service = RAGService()
+conversation_analyzer = get_conversation_analyzer()
 
 class QueryRequest(BaseModel):
     question: str
     top_k: Optional[int] = None
     stream: Optional[bool] = False
+    session_id: Optional[str] = None  # 对话会话ID
+
+class CreateSessionRequest(BaseModel):
+    title: Optional[str] = None
 
 class DeleteRequest(BaseModel):
     filename: str
@@ -63,11 +70,17 @@ async def query(request: QueryRequest):
     """查询知识库"""
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="问题不能为空")
-    
+
+    # 如果没有session_id，创建新会话
+    session_id = request.session_id
+    if not session_id:
+        session_id = rag_service.create_conversation_session()
+
     result = rag_service.query(
         question=request.question,
         top_k=request.top_k,
-        stream=False
+        stream=False,
+        session_id=session_id
     )
     return result
 
@@ -76,13 +89,19 @@ async def query_stream(request: QueryRequest):
     """流式查询知识库"""
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="问题不能为空")
-    
+
+    # 如果没有session_id，创建新会话
+    session_id = request.session_id
+    if not session_id:
+        session_id = rag_service.create_conversation_session()
+
     stream_generator = rag_service.query(
         question=request.question,
         top_k=request.top_k,
-        stream=True
+        stream=True,
+        session_id=session_id
     )
-    
+
     return StreamingResponse(
         stream_generator,
         media_type="text/event-stream"
@@ -120,3 +139,108 @@ async def clear_knowledge_base():
 async def health_check():
     """健康检查"""
     return {"status": "healthy", "message": "RAG系统运行正常"}
+
+
+# ========== 对话历史管理接口 ==========
+
+@router.post("/conversations")
+async def create_conversation(request: CreateSessionRequest):
+    """创建对话会话"""
+    session_id = rag_service.create_conversation_session(request.title)
+    return {
+        "success": True,
+        "session_id": session_id,
+        "message": "会话创建成功"
+    }
+
+@router.get("/conversations")
+async def list_conversations():
+    """获取所有对话会话列表"""
+    sessions = rag_service.get_conversation_sessions()
+    return {"sessions": sessions}
+
+@router.get("/conversations/{session_id}")
+async def get_conversation(session_id: str):
+    """获取单个会话详情"""
+    session = rag_service.get_conversation_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="会话不存在")
+    return session
+
+@router.delete("/conversations/{session_id}")
+async def delete_conversation(session_id: str):
+    """删除对话会话"""
+    result = rag_service.delete_conversation_session(session_id)
+    if not result["success"]:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
+
+
+# ========== 对话导出接口 ==========
+
+@router.get("/conversations/{session_id}/export/markdown")
+async def export_conversation_markdown(
+    session_id: str,
+    include_analysis: bool = Query(True, description="是否包含分析报告")
+):
+    """导出对话为 Markdown 格式"""
+    content = conversation_analyzer.export_to_markdown(session_id, include_analysis)
+    if content.startswith("# 错误"):
+        raise HTTPException(status_code=404, detail="会话不存在")
+
+    return PlainTextResponse(
+        content=content,
+        media_type="text/markdown",
+        headers={
+            "Content-Disposition": f"attachment; filename=conversation_{session_id[:8]}.md"
+        }
+    )
+
+@router.get("/conversations/{session_id}/export/json")
+async def export_conversation_json(
+    session_id: str,
+    include_analysis: bool = Query(True, description="是否包含分析报告")
+):
+    """导出对话为 JSON 格式"""
+    data = conversation_analyzer.export_to_json(session_id, include_analysis)
+    if "error" in data:
+        raise HTTPException(status_code=404, detail=data["error"])
+
+    return JSONResponse(
+        content=data,
+        headers={
+            "Content-Disposition": f"attachment; filename=conversation_{session_id[:8]}.json"
+        }
+    )
+
+@router.get("/conversations/{session_id}/export/csv")
+async def export_conversation_csv(session_id: str):
+    """导出对话为 CSV 格式"""
+    content = conversation_analyzer.export_to_csv(session_id)
+    if content.startswith("error"):
+        raise HTTPException(status_code=404, detail="会话不存在")
+
+    return PlainTextResponse(
+        content=content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=conversation_{session_id[:8]}.csv"
+        }
+    )
+
+
+# ========== 对话分析接口 ==========
+
+@router.get("/conversations/{session_id}/analysis")
+async def analyze_conversation(session_id: str):
+    """获取对话分析报告"""
+    analysis = conversation_analyzer.analyze_session(session_id)
+    if "error" in analysis:
+        raise HTTPException(status_code=404, detail=analysis["error"])
+    return analysis
+
+@router.get("/conversations/statistics/global")
+async def get_global_statistics():
+    """获取全局统计信息"""
+    stats = conversation_analyzer.get_global_statistics()
+    return stats

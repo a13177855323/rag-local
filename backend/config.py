@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./data/uploads"
     MAX_FILE_SIZE: int = 50 * 1024 * 1024
 
+    # 对话历史配置
+    CHAT_HISTORY_PATH: str = "./data/chat_history"
+
     class Config:
         env_file = ".env"
 
@@ -38,3 +41,4 @@ settings = Settings()
 # 创建必要的目录
 os.makedirs(settings.VECTOR_DB_PATH, exist_ok=True)
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+os.makedirs(settings.CHAT_HISTORY_PATH, exist_ok=True)

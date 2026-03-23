@@ -1,17 +1,28 @@
 """
 对话历史存储模块
 支持对话记录的存储、查询、导出和分析
+
+重构改进:
+- 模块化设计: 分类逻辑独立为子函数
+- 配置管理: 使用 ConversationConfig 集中管理配置
+- 异常处理: 完善的异常捕获和日志记录
+- PEP8 规范: 统一的命名和代码风格
 """
 
 import os
 import json
-import csv
-import re
+import uuid
 from datetime import datetime
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
-import uuid
+
+from backend.utils.logger import get_logger, log_info, log_error, log_warning
+from backend.utils.conversation_config import get_config
+
+
+# 模块常量
+MODULE_NAME = "ConversationStore"
 
 
 class QuestionCategory(Enum):
@@ -50,6 +61,215 @@ class ConversationSession:
     metadata: Dict
 
 
+class ClassificationEngine:
+    """问题分类引擎"""
+
+    def __init__(self):
+        self.config = get_config()
+        self.logger = get_logger()
+
+    def classify(self, question: str) -> str:
+        """
+        对问题进行分类
+
+        Args:
+            question: 问题文本
+
+        Returns:
+            分类标签
+        """
+        if not question or not isinstance(question, str):
+            log_warning(
+                MODULE_NAME,
+                "Invalid question for classification",
+                {"question_type": type(question).__name__}
+            )
+            return QuestionCategory.OTHER.value
+
+        question_lower = question.lower()
+
+        # 按优先级依次检查
+        if self._is_code_question(question_lower):
+            return QuestionCategory.CODE.value
+
+        if self._is_debug_question(question_lower):
+            return QuestionCategory.DEBUG.value
+
+        if self._is_comparison_question(question_lower):
+            return QuestionCategory.COMPARISON.value
+
+        if self._is_how_to_question(question_lower):
+            return QuestionCategory.HOW_TO.value
+
+        if self._is_concept_question(question_lower):
+            return QuestionCategory.CONCEPT.value
+
+        return QuestionCategory.OTHER.value
+
+    def _is_code_question(self, question_lower: str) -> bool:
+        """检查是否为代码相关问题"""
+        keywords = self.config.get_category_keywords('code')
+        return any(kw in question_lower for kw in keywords)
+
+    def _is_how_to_question(self, question_lower: str) -> bool:
+        """检查是否为操作指南问题"""
+        keywords = self.config.get_category_keywords('how_to')
+        return any(kw in question_lower for kw in keywords)
+
+    def _is_debug_question(self, question_lower: str) -> bool:
+        """检查是否为调试排错问题"""
+        keywords = self.config.get_category_keywords('debug')
+        return any(kw in question_lower for kw in keywords)
+
+    def _is_comparison_question(self, question_lower: str) -> bool:
+        """检查是否为对比分析问题"""
+        keywords = self.config.get_category_keywords('compare')
+        return any(kw in question_lower for kw in keywords)
+
+    def _is_concept_question(self, question_lower: str) -> bool:
+        """检查是否为概念解释问题"""
+        keywords = self.config.get_category_keywords('concept')
+        return any(kw in question_lower for kw in keywords)
+
+
+class StorageManager:
+    """存储管理器 - 处理文件读写操作"""
+
+    def __init__(self, storage_dir: str, sessions_filename: str):
+        self.storage_dir = storage_dir
+        self.sessions_file = os.path.join(storage_dir, sessions_filename)
+        self.logger = get_logger()
+        self._ensure_storage_exists()
+
+    def _ensure_storage_exists(self):
+        """确保存储目录存在"""
+        try:
+            os.makedirs(self.storage_dir, exist_ok=True)
+            log_info(
+                MODULE_NAME,
+                "Storage directory ensured",
+                {"path": self.storage_dir}
+            )
+        except OSError as e:
+            log_error(
+                MODULE_NAME,
+                "Failed to create storage directory",
+                {"path": self.storage_dir, "error": str(e)}
+            )
+            raise StorageError(f"无法创建存储目录: {e}") from e
+
+    def load_sessions(self) -> Dict[str, Dict]:
+        """
+        从磁盘加载会话数据
+
+        Returns:
+            会话数据字典
+
+        Raises:
+            StorageError: 存储操作失败
+        """
+        if not os.path.exists(self.sessions_file):
+            log_info(MODULE_NAME, "Sessions file not found, starting fresh")
+            return {}
+
+        try:
+            with open(self.sessions_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                log_info(
+                    MODULE_NAME,
+                    "Sessions loaded successfully",
+                    {"count": len(data)}
+                )
+                return data
+
+        except json.JSONDecodeError as e:
+            log_error(
+                MODULE_NAME,
+                "JSON decode error when loading sessions",
+                {"file": self.sessions_file, "error": str(e)}
+            )
+            raise StorageError(f"会话数据格式错误: {e}") from e
+
+        except FileNotFoundError as e:
+            log_warning(
+                MODULE_NAME,
+                "Sessions file not found",
+                {"file": self.sessions_file}
+            )
+            return {}
+
+        except PermissionError as e:
+            log_error(
+                MODULE_NAME,
+                "Permission denied when loading sessions",
+                {"file": self.sessions_file}
+            )
+            raise StorageError(f"无法读取会话文件: {e}") from e
+
+        except Exception as e:
+            log_error(
+                MODULE_NAME,
+                "Unexpected error when loading sessions",
+                {"error": str(e)}
+            )
+            raise StorageError(f"加载会话数据失败: {e}") from e
+
+    def save_sessions(self, sessions_data: Dict[str, Dict]):
+        """
+        保存会话数据到磁盘
+
+        Args:
+            sessions_data: 会话数据字典
+
+        Raises:
+            StorageError: 存储操作失败
+        """
+        try:
+            # 写入临时文件，然后原子替换
+            temp_file = f"{self.sessions_file}.tmp"
+
+            with open(temp_file, 'w', encoding='utf-8') as f:
+                json.dump(sessions_data, f, ensure_ascii=False, indent=2)
+
+            # 原子替换
+            os.replace(temp_file, self.sessions_file)
+
+            log_info(
+                MODULE_NAME,
+                "Sessions saved successfully",
+                {"count": len(sessions_data)}
+            )
+
+        except PermissionError as e:
+            log_error(
+                MODULE_NAME,
+                "Permission denied when saving sessions",
+                {"file": self.sessions_file}
+            )
+            raise StorageError(f"无法写入会话文件: {e}") from e
+
+        except OSError as e:
+            log_error(
+                MODULE_NAME,
+                "OS error when saving sessions",
+                {"file": self.sessions_file, "error": str(e)}
+            )
+            raise StorageError(f"保存会话数据失败: {e}") from e
+
+        except Exception as e:
+            log_error(
+                MODULE_NAME,
+                "Unexpected error when saving sessions",
+                {"error": str(e)}
+            )
+            raise StorageError(f"保存会话数据失败: {e}") from e
+
+
+class StorageError(Exception):
+    """存储操作异常"""
+    pass
+
+
 class ConversationStore:
     """对话存储管理器 - 单例模式"""
     _instance = None
@@ -62,37 +282,61 @@ class ConversationStore:
 
     def _initialize(self):
         """初始化存储"""
-        self.storage_dir = os.path.join("./data", "conversations")
-        os.makedirs(self.storage_dir, exist_ok=True)
+        self.config = get_config()
+        self.logger = get_logger()
+        self.classifier = ClassificationEngine()
 
-        self.sessions_file = os.path.join(self.storage_dir, "sessions.json")
+        # 初始化存储管理器
+        self.storage = StorageManager(
+            storage_dir=self.config.storage_dir,
+            sessions_filename=self.config.sessions_filename
+        )
+
+        # 加载会话数据
         self.sessions: Dict[str, ConversationSession] = {}
-
         self._load_sessions()
 
     def _load_sessions(self):
-        """从磁盘加载会话数据"""
-        if os.path.exists(self.sessions_file):
-            try:
-                with open(self.sessions_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    for session_id, session_data in data.items():
-                        turns = [ConversationTurn(**turn) for turn in session_data.get('turns', [])]
-                        self.sessions[session_id] = ConversationSession(
-                            id=session_data['id'],
-                            title=session_data['title'],
-                            created_at=session_data['created_at'],
-                            updated_at=session_data['updated_at'],
-                            turns=turns,
-                            metadata=session_data.get('metadata', {})
-                        )
-                print(f"加载了 {len(self.sessions)} 个对话会话")
-            except Exception as e:
-                print(f"加载会话数据失败: {e}")
-                self.sessions = {}
+        """加载会话数据"""
+        try:
+            data = self.storage.load_sessions()
+
+            for session_id, session_data in data.items():
+                try:
+                    turns = [
+                        ConversationTurn(**turn)
+                        for turn in session_data.get('turns', [])
+                    ]
+
+                    self.sessions[session_id] = ConversationSession(
+                        id=session_data['id'],
+                        title=session_data['title'],
+                        created_at=session_data['created_at'],
+                        updated_at=session_data['updated_at'],
+                        turns=turns,
+                        metadata=session_data.get('metadata', {})
+                    )
+
+                except (KeyError, TypeError) as e:
+                    log_warning(
+                        MODULE_NAME,
+                        "Failed to parse session data",
+                        {"session_id": session_id, "error": str(e)}
+                    )
+                    continue
+
+            log_info(
+                MODULE_NAME,
+                "Sessions initialized",
+                {"count": len(self.sessions)}
+            )
+
+        except StorageError as e:
+            log_error(MODULE_NAME, "Failed to load sessions", {"error": str(e)})
+            self.sessions = {}
 
     def _save_sessions(self):
-        """保存会话数据到磁盘"""
+        """保存会话数据"""
         try:
             data = {}
             for session_id, session in self.sessions.items():
@@ -104,12 +348,14 @@ class ConversationStore:
                     'turns': [asdict(turn) for turn in session.turns],
                     'metadata': session.metadata
                 }
-            with open(self.sessions_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            print(f"保存会话数据失败: {e}")
 
-    def create_session(self, title: str = None) -> str:
+            self.storage.save_sessions(data)
+
+        except StorageError as e:
+            log_error(MODULE_NAME, "Failed to save sessions", {"error": str(e)})
+            raise
+
+    def create_session(self, title: Optional[str] = None) -> str:
         """
         创建新对话会话
 
@@ -135,7 +381,20 @@ class ConversationStore:
         )
 
         self.sessions[session_id] = session
-        self._save_sessions()
+
+        try:
+            self._save_sessions()
+            log_info(
+                MODULE_NAME,
+                "Session created",
+                {"session_id": session_id, "title": title}
+            )
+        except StorageError as e:
+            log_error(
+                MODULE_NAME,
+                "Failed to save new session",
+                {"session_id": session_id, "error": str(e)}
+            )
 
         return session_id
 
@@ -147,7 +406,7 @@ class ConversationStore:
         sources: List[Dict],
         response_time_ms: int = 0,
         is_code_query: bool = False
-    ) -> ConversationTurn:
+    ) -> Optional[ConversationTurn]:
         """
         添加对话轮次
 
@@ -160,76 +419,84 @@ class ConversationStore:
             is_code_query: 是否为代码查询
 
         Returns:
-            创建的对话轮次
+            创建的对话轮次，失败返回 None
         """
+        # 验证会话存在
         if session_id not in self.sessions:
+            log_warning(
+                MODULE_NAME,
+                "Session not found, creating new",
+                {"session_id": session_id}
+            )
             session_id = self.create_session()
 
-        turn = ConversationTurn(
-            id=str(uuid.uuid4()),
-            session_id=session_id,
-            question=question,
-            answer=answer,
-            sources=sources,
-            timestamp=datetime.now().isoformat(),
-            response_time_ms=response_time_ms,
-            is_code_query=is_code_query,
-            category=self._classify_question(question),
-            quality_score=0.0  # 稍后计算
-        )
+        # 验证输入
+        if not question or not isinstance(question, str):
+            log_error(
+                MODULE_NAME,
+                "Invalid question",
+                {"session_id": session_id, "type": type(question).__name__}
+            )
+            return None
 
-        self.sessions[session_id].turns.append(turn)
-        self.sessions[session_id].updated_at = datetime.now().isoformat()
-        self._save_sessions()
+        try:
+            turn = ConversationTurn(
+                id=str(uuid.uuid4()),
+                session_id=session_id,
+                question=question,
+                answer=answer,
+                sources=sources or [],
+                timestamp=datetime.now().isoformat(),
+                response_time_ms=max(0, response_time_ms),
+                is_code_query=is_code_query,
+                category=self.classifier.classify(question),
+                quality_score=0.0
+            )
 
-        return turn
+            self.sessions[session_id].turns.append(turn)
+            self.sessions[session_id].updated_at = datetime.now().isoformat()
 
-    def _classify_question(self, question: str) -> str:
-        """
-        对问题进行分类
+            self._save_sessions()
 
-        Args:
-            question: 问题文本
+            log_info(
+                MODULE_NAME,
+                "Turn added",
+                {
+                    "session_id": session_id,
+                    "turn_id": turn.id,
+                    "category": turn.category
+                }
+            )
 
-        Returns:
-            分类标签
-        """
-        question_lower = question.lower()
+            return turn
 
-        # 代码相关问题
-        code_keywords = ['代码', 'code', '函数', 'function', '类', 'class', '方法', 'method',
-                        'python', 'java', 'javascript', 'js', 'cpp', 'c++', 'bug', '报错', 'error']
-        if any(kw in question_lower for kw in code_keywords):
-            return QuestionCategory.CODE.value
-
-        # 操作指南
-        how_to_keywords = ['如何', '怎么', 'how to', '步骤', '教程', 'guide', '步骤']
-        if any(kw in question_lower for kw in how_to_keywords):
-            return QuestionCategory.HOW_TO.value
-
-        # 调试排错
-        debug_keywords = ['报错', '错误', 'error', 'exception', '失败', '无法', '不能', 'debug']
-        if any(kw in question_lower for kw in debug_keywords):
-            return QuestionCategory.DEBUG.value
-
-        # 对比分析
-        compare_keywords = ['区别', '对比', '比较', 'difference', 'compare', 'vs', 'versus']
-        if any(kw in question_lower for kw in compare_keywords):
-            return QuestionCategory.COMPARISON.value
-
-        # 概念解释
-        concept_keywords = ['什么是', '什么是', '概念', '原理', '机制', '什么是', 'what is', 'explain']
-        if any(kw in question_lower for kw in concept_keywords):
-            return QuestionCategory.CONCEPT.value
-
-        return QuestionCategory.OTHER.value
+        except Exception as e:
+            log_error(
+                MODULE_NAME,
+                "Failed to add turn",
+                {"session_id": session_id, "error": str(e)}
+            )
+            return None
 
     def get_session(self, session_id: str) -> Optional[ConversationSession]:
-        """获取会话"""
+        """
+        获取会话
+
+        Args:
+            session_id: 会话ID
+
+        Returns:
+            会话对象，不存在返回 None
+        """
         return self.sessions.get(session_id)
 
     def get_all_sessions(self) -> List[Dict]:
-        """获取所有会话列表"""
+        """
+        获取所有会话列表
+
+        Returns:
+            会话摘要列表
+        """
         return [
             {
                 "id": session.id,
@@ -242,21 +509,78 @@ class ConversationStore:
         ]
 
     def delete_session(self, session_id: str) -> bool:
-        """删除会话"""
-        if session_id in self.sessions:
+        """
+        删除会话
+
+        Args:
+            session_id: 会话ID
+
+        Returns:
+            是否删除成功
+        """
+        if session_id not in self.sessions:
+            log_warning(
+                MODULE_NAME,
+                "Cannot delete non-existent session",
+                {"session_id": session_id}
+            )
+            return False
+
+        try:
             del self.sessions[session_id]
             self._save_sessions()
-            return True
-        return False
 
-    def update_turn_quality_score(self, turn_id: str, score: float):
-        """更新对话轮次的质量评分"""
+            log_info(
+                MODULE_NAME,
+                "Session deleted",
+                {"session_id": session_id}
+            )
+            return True
+
+        except StorageError as e:
+            log_error(
+                MODULE_NAME,
+                "Failed to delete session",
+                {"session_id": session_id, "error": str(e)}
+            )
+            return False
+
+    def update_turn_quality_score(self, turn_id: str, score: float) -> bool:
+        """
+        更新对话轮次的质量评分
+
+        Args:
+            turn_id: 轮次ID
+            score: 质量评分
+
+        Returns:
+            是否更新成功
+        """
         for session in self.sessions.values():
             for turn in session.turns:
                 if turn.id == turn_id:
-                    turn.quality_score = score
-                    self._save_sessions()
-                    return True
+                    turn.quality_score = max(0.0, min(100.0, score))
+                    try:
+                        self._save_sessions()
+                        log_info(
+                            MODULE_NAME,
+                            "Quality score updated",
+                            {"turn_id": turn_id, "score": score}
+                        )
+                        return True
+                    except StorageError as e:
+                        log_error(
+                            MODULE_NAME,
+                            "Failed to save quality score",
+                            {"turn_id": turn_id, "error": str(e)}
+                        )
+                        return False
+
+        log_warning(
+            MODULE_NAME,
+            "Turn not found for quality update",
+            {"turn_id": turn_id}
+        )
         return False
 
 

@@ -4,13 +4,21 @@ from pydantic import BaseModel
 from typing import List, Optional
 import os
 import shutil
+import json
 from backend.config import settings
 from backend.services.rag_service import RAGService
+from backend.utils.code_detector import is_code_query
 
 router = APIRouter(prefix="/api", tags=["RAG"])
 rag_service = RAGService()
 
 class QueryRequest(BaseModel):
+    question: str
+    top_k: Optional[int] = None
+    stream: Optional[bool] = False
+    code_mode: Optional[bool] = False  # 强制代码模式
+
+class CodeQueryRequest(BaseModel):
     question: str
     top_k: Optional[int] = None
     stream: Optional[bool] = False
@@ -60,33 +68,82 @@ async def upload_file(files: List[UploadFile] = File(...)):
 
 @router.post("/query")
 async def query(request: QueryRequest):
-    """查询知识库"""
+    """查询知识库（自动检测代码问题）"""
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="问题不能为空")
-    
+
     result = rag_service.query(
+        question=request.question,
+        top_k=request.top_k,
+        stream=False,
+        code_mode=request.code_mode
+    )
+    return result
+
+@router.post("/query/stream")
+async def query_stream(request: QueryRequest):
+    """流式查询知识库（自动检测代码问题）"""
+    if not request.question.strip():
+        raise HTTPException(status_code=400, detail="问题不能为空")
+
+    stream_generator = rag_service.query(
+        question=request.question,
+        top_k=request.top_k,
+        stream=True,
+        code_mode=request.code_mode
+    )
+
+    return StreamingResponse(
+        stream_generator,
+        media_type="text/event-stream"
+    )
+
+@router.post("/query/code")
+async def query_code(request: CodeQueryRequest):
+    """代码问答专用接口"""
+    if not request.question.strip():
+        raise HTTPException(status_code=400, detail="问题不能为空")
+
+    result = rag_service.query_code(
         question=request.question,
         top_k=request.top_k,
         stream=False
     )
     return result
 
-@router.post("/query/stream")
-async def query_stream(request: QueryRequest):
-    """流式查询知识库"""
+@router.post("/query/code/stream")
+async def query_code_stream(request: CodeQueryRequest):
+    """代码问答流式接口"""
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="问题不能为空")
-    
-    stream_generator = rag_service.query(
+
+    stream_generator = rag_service.query_code(
         question=request.question,
         top_k=request.top_k,
         stream=True
     )
-    
+
+    async def event_generator():
+        async for chunk in stream_generator:
+            yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+
     return StreamingResponse(
-        stream_generator,
+        event_generator(),
         media_type="text/event-stream"
     )
+
+@router.post("/query/detect")
+async def detect_query_type(question: str):
+    """检测问题类型（是否为代码问题）"""
+    if not question.strip():
+        raise HTTPException(status_code=400, detail="问题不能为空")
+
+    is_code = is_code_query(question)
+    return {
+        "question": question,
+        "is_code_query": is_code,
+        "message": "检测到代码相关问题" if is_code else "普通问题"
+    }
 
 @router.get("/documents")
 async def get_documents():

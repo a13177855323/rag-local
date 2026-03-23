@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, PlainTextResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import os
@@ -17,6 +17,13 @@ class QueryRequest(BaseModel):
 
 class DeleteRequest(BaseModel):
     filename: str
+
+class ExportRequest(BaseModel):
+    format: str = "markdown"
+    session_ids: Optional[List[str]] = None
+
+class AnalyzeRequest(BaseModel):
+    session_ids: Optional[List[str]] = None
 
 @router.post("/upload")
 async def upload_file(files: List[UploadFile] = File(...)):
@@ -120,3 +127,96 @@ async def clear_knowledge_base():
 async def health_check():
     """健康检查"""
     return {"status": "healthy", "message": "RAG系统运行正常"}
+
+
+# ==================== 对话历史管理接口 ====================
+
+@router.get("/conversations")
+async def get_conversation_sessions():
+    """获取所有对话会话列表"""
+    sessions = rag_service.get_conversation_sessions()
+    return {"sessions": sessions}
+
+@router.get("/conversations/current")
+async def get_current_session():
+    """获取当前会话详情"""
+    result = rag_service.get_current_session()
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
+
+@router.get("/conversations/{session_id}")
+async def get_conversation_session(session_id: str):
+    """获取指定会话详情"""
+    result = rag_service.get_conversation_session(session_id)
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
+
+@router.delete("/conversations/{session_id}")
+async def delete_conversation_session(session_id: str):
+    """删除指定会话"""
+    result = rag_service.delete_conversation_session(session_id)
+    if not result.get("success"):
+        raise HTTPException(status_code=404, detail=result.get("error"))
+    return result
+
+@router.delete("/conversations")
+async def clear_conversation_history():
+    """清空所有对话历史"""
+    result = rag_service.clear_conversation_history()
+    return result
+
+@router.post("/conversations/analyze")
+async def analyze_conversations(request: AnalyzeRequest):
+    """分析对话历史"""
+    result = rag_service.analyze_conversations(request.session_ids)
+    return result
+
+@router.post("/conversations/export")
+async def export_conversations(request: ExportRequest):
+    """导出对话历史"""
+    valid_formats = ["markdown", "json", "csv"]
+    if request.format not in valid_formats:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"不支持的格式。支持的格式: {', '.join(valid_formats)}"
+        )
+    
+    result = rag_service.export_conversations(
+        format_type=request.format,
+        session_ids=request.session_ids
+    )
+    
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
+
+@router.get("/conversations/export/{session_id}/{format_type}")
+async def export_single_session(session_id: str, format_type: str):
+    """导出单个会话"""
+    valid_formats = ["markdown", "json"]
+    if format_type not in valid_formats:
+        raise HTTPException(
+            status_code=400,
+            detail=f"不支持的格式。支持的格式: {', '.join(valid_formats)}"
+        )
+    
+    result = rag_service.export_conversations(
+        format_type=format_type,
+        session_ids=[session_id]
+    )
+    
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    
+    exported_files = result.get("exported_files", {})
+    if session_id in exported_files:
+        filepath = exported_files[session_id]
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        media_type = "text/markdown" if format_type == "markdown" else "application/json"
+        return PlainTextResponse(content=content, media_type=media_type)
+    
+    raise HTTPException(status_code=500, detail="导出失败")

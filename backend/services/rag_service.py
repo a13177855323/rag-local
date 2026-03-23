@@ -1,10 +1,13 @@
 from typing import List, Dict
 import os
+import time
 from backend.config import settings
 from backend.models.embedding_model import EmbeddingModel
 from backend.models.llm_model import LLMModel
 from backend.services.vector_store import VectorStore
 from backend.utils.document_processor import DocumentProcessor
+from backend.services.conversation_history import get_conversation_history
+from backend.services.conversation_analyzer import get_analyzer
 
 class RAGService:
     _instance = None
@@ -21,6 +24,8 @@ class RAGService:
         self.llm_model = LLMModel()
         self.vector_store = VectorStore()
         self.document_processor = DocumentProcessor()
+        self.conversation_history = get_conversation_history()
+        self.analyzer = get_analyzer()
 
     def ingest_document(self, file_path: str) -> Dict:
         """处理并导入单个文档"""
@@ -60,18 +65,17 @@ class RAGService:
         if top_k is None:
             top_k = settings.TOP_K
 
-        # 生成查询嵌入
+        start_time = time.time()
+
         query_embedding = self.embedding_model.embed_query(question)
 
-        # 搜索相关文档
         search_results = self.vector_store.search(query_embedding, top_k)
 
-        # 提取上下文
         context = [doc.get("content", "") for doc, score in search_results]
         sources = [
             {
                 "filename": doc.get("metadata", {}).get("filename", ""),
-                "content": doc.get("content", "")[:200],  # 只返回前200字符作为预览
+                "content": doc.get("content", "")[:200],
                 "similarity": float(score)
             } for doc, score in search_results
         ]
@@ -89,9 +93,7 @@ class RAGService:
                 }
             return
 
-        # 生成回答
         if stream:
-            # 流式输出
             def stream_response():
                 full_response = ""
                 for chunk in self.llm_model.generate_stream(question, context):
@@ -106,9 +108,40 @@ class RAGService:
                     "done": True,
                     "sources": sources
                 }
+                
+                response_time_ms = (time.time() - start_time) * 1000
+                if settings.ENABLE_CONVERSATION_HISTORY:
+                    turn = self.conversation_history.add_turn(
+                        question=question,
+                        answer=full_response,
+                        sources=sources,
+                        response_time_ms=response_time_ms
+                    )
+                    if settings.CONVERSATION_AUTO_ANALYZE:
+                        category = self.analyzer.classify_question(question)
+                        quality = self.analyzer.score_turn(turn)
+                        self.conversation_history.update_turn_analysis(
+                            turn.turn_id, category, quality
+                        )
             return stream_response()
         else:
             answer = self.llm_model.generate(question, context)
+            response_time_ms = (time.time() - start_time) * 1000
+            
+            if settings.ENABLE_CONVERSATION_HISTORY:
+                turn = self.conversation_history.add_turn(
+                    question=question,
+                    answer=answer,
+                    sources=sources,
+                    response_time_ms=response_time_ms
+                )
+                if settings.CONVERSATION_AUTO_ANALYZE:
+                    category = self.analyzer.classify_question(question)
+                    quality = self.analyzer.score_turn(turn)
+                    self.conversation_history.update_turn_analysis(
+                        turn.turn_id, category, quality
+                    )
+            
             return {
                 "answer": answer,
                 "sources": sources
@@ -161,3 +194,108 @@ class RAGService:
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    def get_conversation_sessions(self) -> List[Dict]:
+        """获取所有对话会话列表"""
+        return self.conversation_history.get_all_sessions()
+
+    def get_conversation_session(self, session_id: str) -> Dict:
+        """获取指定会话详情"""
+        session = self.conversation_history.get_session(session_id)
+        if session:
+            analysis = self.analyzer.analyze_session(session)
+            return {
+                "session": session.to_dict(),
+                "analysis": {
+                    "summary": analysis.summary,
+                    "total_turns": analysis.total_turns,
+                    "category_stats": analysis.category_stats,
+                    "avg_quality_score": analysis.avg_quality_score,
+                    "avg_response_time_ms": analysis.avg_response_time_ms,
+                    "topics": analysis.topics,
+                    "quality_distribution": analysis.quality_distribution
+                }
+            }
+        return {"error": "会话不存在"}
+
+    def get_current_session(self) -> Dict:
+        """获取当前会话"""
+        session = self.conversation_history.get_current_session()
+        if session:
+            analysis = self.analyzer.analyze_session(session)
+            return {
+                "session": session.to_dict(),
+                "analysis": {
+                    "summary": analysis.summary,
+                    "total_turns": analysis.total_turns,
+                    "category_stats": analysis.category_stats,
+                    "avg_quality_score": analysis.avg_quality_score
+                }
+            }
+        return {"error": "无当前会话"}
+
+    def analyze_conversations(self, session_ids: List[str] = None) -> Dict:
+        """分析对话历史"""
+        from backend.services.conversation_exporter import get_exporter
+        
+        if session_ids:
+            sessions = []
+            for sid in session_ids:
+                session = self.conversation_history.get_session(sid)
+                if session:
+                    sessions.append(session)
+        else:
+            all_sessions_info = self.conversation_history.get_all_sessions()
+            sessions = []
+            for info in all_sessions_info:
+                session = self.conversation_history.get_session(info["session_id"])
+                if session:
+                    sessions.append(session)
+
+        return self.analyzer.analyze_multiple_sessions(sessions)
+
+    def export_conversations(
+        self,
+        format_type: str = "markdown",
+        session_ids: List[str] = None
+    ) -> Dict:
+        """导出对话历史"""
+        from backend.services.conversation_exporter import get_exporter
+        exporter = get_exporter()
+
+        if session_ids:
+            sessions = []
+            for sid in session_ids:
+                session = self.conversation_history.get_session(sid)
+                if session:
+                    sessions.append(session)
+        else:
+            all_sessions_info = self.conversation_history.get_all_sessions()
+            sessions = []
+            for info in all_sessions_info:
+                session = self.conversation_history.get_session(info["session_id"])
+                if session:
+                    sessions.append(session)
+
+        if not sessions:
+            return {"error": "没有可导出的对话记录"}
+
+        results = exporter.export_all_sessions(sessions, self.analyzer, format_type)
+        return {
+            "success": True,
+            "format": format_type,
+            "exported_files": results,
+            "session_count": len(sessions)
+        }
+
+    def delete_conversation_session(self, session_id: str) -> Dict:
+        """删除指定会话"""
+        success = self.conversation_history.delete_session(session_id)
+        if success:
+            return {"success": True, "message": f"已删除会话 {session_id}"}
+        return {"success": False, "error": "会话不存在"}
+
+    def clear_conversation_history(self) -> Dict:
+        """清空所有对话历史"""
+        count = self.conversation_history.clear_all_history()
+        return {"success": True, "message": f"已清空 {count} 个会话"}

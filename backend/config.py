@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     MAX_TOKENS: int = 2048
     TEMPERATURE: float = 0.7
 
+    # 代码检索配置
+    CODE_SEARCH_TOP_K: int = 3
+    CODE_BOOST_FACTOR: float = 1.5
+    ENABLE_CODE_DETECTION: bool = True
+    CODE_CONFIDENCE_THRESHOLD: float = 0.3
+
     # 文件存储配置
     UPLOAD_DIR: str = "./data/uploads"
     MAX_FILE_SIZE: int = 50 * 1024 * 1024

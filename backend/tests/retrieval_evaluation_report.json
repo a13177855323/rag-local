@@ -1,0 +1,1283 @@
+{
+  "timestamp": "2026-03-24T19:29:11.894105",
+  "configurations": {
+    "top_k_5": {
+      "aggregate_metrics": {
+        "overall": {
+          "hit_rate_at_k": {
+            "@1": 0.75,
+            "@3": 0.75,
+            "@5": 0.8,
+            "@10": 0.8
+          },
+          "mrr": 0.7625,
+          "ndcg_at_10": 0.6487,
+          "avg_latency_ms": 268.0,
+          "total_queries": 20
+        },
+        "by_difficulty": {
+          "exact_match": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.9885,
+            "avg_latency_ms": 496.04,
+            "total_queries": 7
+          },
+          "fuzzy_match": {
+            "hit_rate_at_k": {
+              "@1": 0.4286,
+              "@3": 0.4286,
+              "@5": 0.4286,
+              "@10": 0.4286
+            },
+            "mrr": 0.4286,
+            "ndcg_at_10": 0.2723,
+            "avg_latency_ms": 108.52,
+            "total_queries": 7
+          },
+          "semantic_understanding": {
+            "hit_rate_at_k": {
+              "@1": 0.8333,
+              "@3": 0.8333,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 0.875,
+            "ndcg_at_10": 0.6915,
+            "avg_latency_ms": 188.0,
+            "total_queries": 6
+          }
+        }
+      },
+      "detailed_results": [
+        {
+          "query_id": "exact_001",
+          "query_text": "什么是FAISS索引",
+          "retrieved_doc_ids": [
+            "doc_vector_db",
+            "doc_faiss_intro",
+            "db_performance",
+            "doc_rest_api",
+            "doc_sql_optimization"
+          ],
+          "relevant_doc_ids": [
+            "doc_vector_db",
+            "doc_faiss_intro"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 1986.109972000122
+        },
+        {
+          "query_id": "exact_002",
+          "query_text": "Python中的列表推导式",
+          "retrieved_doc_ids": [
+            "doc_python_list",
+            "doc_python_advanced",
+            "doc_docker",
+            "doc_deployment",
+            "doc_recommendation"
+          ],
+          "relevant_doc_ids": [
+            "doc_python_advanced",
+            "doc_python_list"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 30.134201049804688
+        },
+        {
+          "query_id": "exact_003",
+          "query_text": "Transformer架构原理",
+          "retrieved_doc_ids": [
+            "doc_transformer",
+            "doc_bert",
+            "doc_attention_mechanism",
+            "doc_nlp",
+            "doc_version_control"
+          ],
+          "relevant_doc_ids": [
+            "doc_transformer",
+            "doc_attention_mechanism"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.9197207891481876
+          },
+          "latency_ms": 654.7050476074219
+        },
+        {
+          "query_id": "exact_004",
+          "query_text": "REST API设计规范",
+          "retrieved_doc_ids": [
+            "doc_rest_api",
+            "doc_api_design",
+            "doc_low_code",
+            "doc_deployment",
+            "doc_no_code"
+          ],
+          "relevant_doc_ids": [
+            "doc_api_design",
+            "doc_rest_api"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 717.5428867340088
+        },
+        {
+          "query_id": "exact_005",
+          "query_text": "Docker容器化部署",
+          "retrieved_doc_ids": [
+            "doc_docker",
+            "doc_deployment",
+            "doc_load_balancing",
+            "db_performance",
+            "doc_vector_db"
+          ],
+          "relevant_doc_ids": [
+            "doc_docker",
+            "doc_deployment"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 28.329849243164062
+        },
+        {
+          "query_id": "exact_006",
+          "query_text": "SQL性能优化技巧",
+          "retrieved_doc_ids": [
+            "doc_sql_optimization",
+            "db_performance",
+            "doc_code_optimization",
+            "doc_performance_tuning",
+            "doc_vector_db"
+          ],
+          "relevant_doc_ids": [
+            "db_performance",
+            "doc_sql_optimization"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 26.739835739135742
+        },
+        {
+          "query_id": "exact_007",
+          "query_text": "Git分支管理策略",
+          "retrieved_doc_ids": [
+            "doc_git_workflow",
+            "doc_version_control",
+            "doc_transformer",
+            "doc_deployment",
+            "doc_performance_tuning"
+          ],
+          "relevant_doc_ids": [
+            "doc_git_workflow",
+            "doc_version_control"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 28.741121292114258
+        },
+        {
+          "query_id": "fuzzy_001",
+          "query_text": "如何提高代码运行速度",
+          "retrieved_doc_ids": [
+            "doc_code_optimization",
+            "doc_low_code",
+            "db_performance",
+            "doc_performance_tuning",
+            "doc_deployment"
+          ],
+          "relevant_doc_ids": [
+            "doc_code_optimization",
+            "doc_performance_tuning",
+            "doc_profiling"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.6713860725233041
+          },
+          "latency_ms": 23.24676513671875
+        },
+        {
+          "query_id": "fuzzy_002",
+          "query_text": "神经网络训练不收敛怎么办",
+          "retrieved_doc_ids": [
+            "doc_training_tips",
+            "doc_gradient_problems",
+            "doc_machine_learning",
+            "doc_transformer",
+            "doc_nlp"
+          ],
+          "relevant_doc_ids": [
+            "doc_training_tips",
+            "doc_gradient_problems",
+            "doc_optimization"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 603.0151844024658
+        },
+        {
+          "query_id": "fuzzy_003",
+          "query_text": "数据存储方案对比",
+          "retrieved_doc_ids": [
+            "doc_vector_db",
+            "db_performance",
+            "doc_distributed_systems",
+            "doc_load_balancing",
+            "doc_security"
+          ],
+          "relevant_doc_ids": [
+            "doc_storage_solutions",
+            "doc_nosql",
+            "doc_database_comparison"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 0.0,
+              "@10": 0.0
+            },
+            "mrr": 0.0,
+            "ndcg_at_10": 0.0
+          },
+          "latency_ms": 28.32627296447754
+        },
+        {
+          "query_id": "fuzzy_004",
+          "query_text": "前后端分离的优势",
+          "retrieved_doc_ids": [
+            "doc_gradient_problems",
+            "doc_attention_mechanism",
+            "doc_training_tips",
+            "doc_sql_optimization",
+            "doc_performance_tuning"
+          ],
+          "relevant_doc_ids": [
+            "doc_architecture",
+            "doc_microservices",
+            "doc_frontend_backend"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 0.0,
+              "@10": 0.0
+            },
+            "mrr": 0.0,
+            "ndcg_at_10": 0.0
+          },
+          "latency_ms": 27.129173278808594
+        },
+        {
+          "query_id": "fuzzy_005",
+          "query_text": "模型部署到生产环境",
+          "retrieved_doc_ids": [
+            "doc_deployment",
+            "doc_docker",
+            "doc_git_workflow",
+            "doc_performance_tuning",
+            "doc_attention_mechanism"
+          ],
+          "relevant_doc_ids": [
+            "doc_model_serving",
+            "doc_deployment",
+            "doc_mlops"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.46927872602275644
+          },
+          "latency_ms": 28.781890869140625
+        },
+        {
+          "query_id": "fuzzy_006",
+          "query_text": "处理大规模数据的方法",
+          "retrieved_doc_ids": [
+            "doc_vector_db",
+            "db_performance",
+            "doc_sql_optimization",
+            "doc_clustering",
+            "doc_code_optimization"
+          ],
+          "relevant_doc_ids": [
+            "doc_big_data",
+            "doc_spark",
+            "doc_distributed_computing"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 0.0,
+              "@10": 0.0
+            },
+            "mrr": 0.0,
+            "ndcg_at_10": 0.0
+          },
+          "latency_ms": 23.811817169189453
+        },
+        {
+          "query_id": "fuzzy_007",
+          "query_text": "代码质量保证措施",
+          "retrieved_doc_ids": [
+            "doc_code_optimization",
+            "doc_low_code",
+            "doc_api_design",
+            "doc_rest_api",
+            "doc_sql_optimization"
+          ],
+          "relevant_doc_ids": [
+            "doc_ci_cd",
+            "doc_testing",
+            "doc_code_review"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 0.0,
+              "@10": 0.0
+            },
+            "mrr": 0.0,
+            "ndcg_at_10": 0.0
+          },
+          "latency_ms": 25.33102035522461
+        },
+        {
+          "query_id": "semantic_001",
+          "query_text": "让机器理解人类语言的技术",
+          "retrieved_doc_ids": [
+            "doc_nlp",
+            "doc_machine_learning",
+            "doc_bert",
+            "doc_attention_mechanism",
+            "doc_no_code"
+          ],
+          "relevant_doc_ids": [
+            "doc_transformer",
+            "doc_nlp",
+            "doc_bert"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7039180890341347
+          },
+          "latency_ms": 524.3630409240723
+        },
+        {
+          "query_id": "semantic_002",
+          "query_text": "不用写代码就能创建应用的平台",
+          "retrieved_doc_ids": [
+            "doc_no_code",
+            "doc_low_code",
+            "doc_deployment",
+            "doc_python_advanced",
+            "doc_api_design"
+          ],
+          "relevant_doc_ids": [
+            "doc_app_builder",
+            "doc_low_code",
+            "doc_no_code"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 499.2358684539795
+        },
+        {
+          "query_id": "semantic_003",
+          "query_text": "根据用户喜好推荐商品的算法",
+          "retrieved_doc_ids": [
+            "doc_recommendation",
+            "doc_collaborative_filtering",
+            "doc_code_optimization",
+            "db_performance",
+            "doc_sql_optimization"
+          ],
+          "relevant_doc_ids": [
+            "doc_collaborative_filtering",
+            "doc_matrix_factorization",
+            "doc_recommendation"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 26.762962341308594
+        },
+        {
+          "query_id": "semantic_004",
+          "query_text": "自动发现数据中的模式",
+          "retrieved_doc_ids": [
+            "doc_code_optimization",
+            "db_performance",
+            "doc_attention_mechanism",
+            "doc_machine_learning",
+            "doc_clustering"
+          ],
+          "relevant_doc_ids": [
+            "doc_machine_learning",
+            "doc_clustering",
+            "doc_pattern_recognition"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 0.25,
+            "ndcg_at_10": 0.38364913903790027
+          },
+          "latency_ms": 23.227214813232422
+        },
+        {
+          "query_id": "semantic_005",
+          "query_text": "保护数据不被未授权访问",
+          "retrieved_doc_ids": [
+            "doc_security",
+            "doc_encryption",
+            "doc_no_code",
+            "doc_rest_api",
+            "doc_vector_db"
+          ],
+          "relevant_doc_ids": [
+            "doc_authentication",
+            "doc_encryption",
+            "doc_security"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 26.752948760986328
+        },
+        {
+          "query_id": "semantic_006",
+          "query_text": "多台计算机协同工作",
+          "retrieved_doc_ids": [
+            "doc_distributed_systems",
+            "doc_load_balancing",
+            "doc_machine_learning",
+            "db_performance",
+            "doc_gradient_problems"
+          ],
+          "relevant_doc_ids": [
+            "doc_cluster_computing",
+            "doc_distributed_systems",
+            "doc_load_balancing"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 27.68707275390625
+        }
+      ]
+    },
+    "top_k_10": {
+      "aggregate_metrics": {
+        "overall": {
+          "hit_rate_at_k": {
+            "@1": 0.75,
+            "@3": 0.75,
+            "@5": 0.8,
+            "@10": 0.8
+          },
+          "mrr": 0.7625,
+          "ndcg_at_10": 0.6571,
+          "avg_latency_ms": 25.87,
+          "total_queries": 20
+        },
+        "by_difficulty": {
+          "exact_match": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.9885,
+            "avg_latency_ms": 28.75,
+            "total_queries": 7
+          },
+          "fuzzy_match": {
+            "hit_rate_at_k": {
+              "@1": 0.4286,
+              "@3": 0.4286,
+              "@5": 0.4286,
+              "@10": 0.4286
+            },
+            "mrr": 0.4286,
+            "ndcg_at_10": 0.2723,
+            "avg_latency_ms": 23.72,
+            "total_queries": 7
+          },
+          "semantic_understanding": {
+            "hit_rate_at_k": {
+              "@1": 0.8333,
+              "@3": 0.8333,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 0.875,
+            "ndcg_at_10": 0.7194,
+            "avg_latency_ms": 25.02,
+            "total_queries": 6
+          }
+        }
+      },
+      "detailed_results": [
+        {
+          "query_id": "exact_001",
+          "query_text": "什么是FAISS索引",
+          "retrieved_doc_ids": [
+            "doc_vector_db",
+            "doc_faiss_intro",
+            "db_performance",
+            "doc_rest_api",
+            "doc_sql_optimization",
+            "doc_recommendation",
+            "doc_python_list",
+            "doc_python_advanced",
+            "doc_docker",
+            "doc_clustering"
+          ],
+          "relevant_doc_ids": [
+            "doc_vector_db",
+            "doc_faiss_intro"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 24.044036865234375
+        },
+        {
+          "query_id": "exact_002",
+          "query_text": "Python中的列表推导式",
+          "retrieved_doc_ids": [
+            "doc_python_list",
+            "doc_python_advanced",
+            "doc_docker",
+            "doc_deployment",
+            "doc_recommendation",
+            "doc_code_optimization",
+            "doc_rest_api",
+            "doc_collaborative_filtering",
+            "doc_clustering",
+            "doc_no_code"
+          ],
+          "relevant_doc_ids": [
+            "doc_python_advanced",
+            "doc_python_list"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 31.69989585876465
+        },
+        {
+          "query_id": "exact_003",
+          "query_text": "Transformer架构原理",
+          "retrieved_doc_ids": [
+            "doc_transformer",
+            "doc_bert",
+            "doc_attention_mechanism",
+            "doc_nlp",
+            "doc_version_control",
+            "doc_distributed_systems",
+            "doc_code_optimization",
+            "doc_low_code",
+            "doc_performance_tuning",
+            "doc_encryption"
+          ],
+          "relevant_doc_ids": [
+            "doc_transformer",
+            "doc_attention_mechanism"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.9197207891481876
+          },
+          "latency_ms": 29.727935791015625
+        },
+        {
+          "query_id": "exact_004",
+          "query_text": "REST API设计规范",
+          "retrieved_doc_ids": [
+            "doc_rest_api",
+            "doc_api_design",
+            "doc_low_code",
+            "doc_deployment",
+            "doc_no_code",
+            "doc_docker",
+            "doc_load_balancing",
+            "doc_code_optimization",
+            "doc_git_workflow",
+            "doc_python_advanced"
+          ],
+          "relevant_doc_ids": [
+            "doc_api_design",
+            "doc_rest_api"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 29.740095138549805
+        },
+        {
+          "query_id": "exact_005",
+          "query_text": "Docker容器化部署",
+          "retrieved_doc_ids": [
+            "doc_docker",
+            "doc_deployment",
+            "doc_load_balancing",
+            "db_performance",
+            "doc_vector_db",
+            "doc_distributed_systems",
+            "doc_python_advanced",
+            "doc_bert",
+            "doc_rest_api",
+            "doc_performance_tuning"
+          ],
+          "relevant_doc_ids": [
+            "doc_docker",
+            "doc_deployment"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 27.4350643157959
+        },
+        {
+          "query_id": "exact_006",
+          "query_text": "SQL性能优化技巧",
+          "retrieved_doc_ids": [
+            "doc_sql_optimization",
+            "db_performance",
+            "doc_code_optimization",
+            "doc_performance_tuning",
+            "doc_vector_db",
+            "doc_load_balancing",
+            "doc_api_design",
+            "doc_training_tips",
+            "doc_clustering",
+            "doc_collaborative_filtering"
+          ],
+          "relevant_doc_ids": [
+            "db_performance",
+            "doc_sql_optimization"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 33.524274826049805
+        },
+        {
+          "query_id": "exact_007",
+          "query_text": "Git分支管理策略",
+          "retrieved_doc_ids": [
+            "doc_git_workflow",
+            "doc_version_control",
+            "doc_transformer",
+            "doc_deployment",
+            "doc_performance_tuning",
+            "doc_gradient_problems",
+            "doc_rest_api",
+            "doc_training_tips",
+            "doc_code_optimization",
+            "doc_bert"
+          ],
+          "relevant_doc_ids": [
+            "doc_git_workflow",
+            "doc_version_control"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 1.0
+          },
+          "latency_ms": 25.092124938964844
+        },
+        {
+          "query_id": "fuzzy_001",
+          "query_text": "如何提高代码运行速度",
+          "retrieved_doc_ids": [
+            "doc_code_optimization",
+            "doc_low_code",
+            "db_performance",
+            "doc_performance_tuning",
+            "doc_deployment",
+            "doc_sql_optimization",
+            "doc_load_balancing",
+            "doc_no_code",
+            "doc_training_tips",
+            "doc_gradient_problems"
+          ],
+          "relevant_doc_ids": [
+            "doc_code_optimization",
+            "doc_performance_tuning",
+            "doc_profiling"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.6713860725233041
+          },
+          "latency_ms": 24.63388442993164
+        },
+        {
+          "query_id": "fuzzy_002",
+          "query_text": "神经网络训练不收敛怎么办",
+          "retrieved_doc_ids": [
+            "doc_training_tips",
+            "doc_gradient_problems",
+            "doc_machine_learning",
+            "doc_transformer",
+            "doc_nlp",
+            "doc_performance_tuning",
+            "doc_attention_mechanism",
+            "doc_clustering",
+            "doc_git_workflow",
+            "db_performance"
+          ],
+          "relevant_doc_ids": [
+            "doc_training_tips",
+            "doc_gradient_problems",
+            "doc_optimization"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 23.905038833618164
+        },
+        {
+          "query_id": "fuzzy_003",
+          "query_text": "数据存储方案对比",
+          "retrieved_doc_ids": [
+            "doc_vector_db",
+            "db_performance",
+            "doc_distributed_systems",
+            "doc_load_balancing",
+            "doc_security",
+            "doc_sql_optimization",
+            "doc_clustering",
+            "doc_rest_api",
+            "doc_encryption",
+            "doc_docker"
+          ],
+          "relevant_doc_ids": [
+            "doc_storage_solutions",
+            "doc_nosql",
+            "doc_database_comparison"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 0.0,
+              "@10": 0.0
+            },
+            "mrr": 0.0,
+            "ndcg_at_10": 0.0
+          },
+          "latency_ms": 23.25606346130371
+        },
+        {
+          "query_id": "fuzzy_004",
+          "query_text": "前后端分离的优势",
+          "retrieved_doc_ids": [
+            "doc_gradient_problems",
+            "doc_attention_mechanism",
+            "doc_training_tips",
+            "doc_sql_optimization",
+            "doc_performance_tuning",
+            "doc_docker",
+            "doc_clustering",
+            "doc_git_workflow",
+            "doc_machine_learning",
+            "doc_load_balancing"
+          ],
+          "relevant_doc_ids": [
+            "doc_architecture",
+            "doc_microservices",
+            "doc_frontend_backend"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 0.0,
+              "@10": 0.0
+            },
+            "mrr": 0.0,
+            "ndcg_at_10": 0.0
+          },
+          "latency_ms": 24.103164672851562
+        },
+        {
+          "query_id": "fuzzy_005",
+          "query_text": "模型部署到生产环境",
+          "retrieved_doc_ids": [
+            "doc_deployment",
+            "doc_docker",
+            "doc_git_workflow",
+            "doc_performance_tuning",
+            "doc_attention_mechanism",
+            "doc_version_control",
+            "doc_distributed_systems",
+            "doc_code_optimization",
+            "doc_rest_api",
+            "doc_machine_learning"
+          ],
+          "relevant_doc_ids": [
+            "doc_model_serving",
+            "doc_deployment",
+            "doc_mlops"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.46927872602275644
+          },
+          "latency_ms": 24.145841598510742
+        },
+        {
+          "query_id": "fuzzy_006",
+          "query_text": "处理大规模数据的方法",
+          "retrieved_doc_ids": [
+            "doc_vector_db",
+            "db_performance",
+            "doc_sql_optimization",
+            "doc_clustering",
+            "doc_code_optimization",
+            "doc_distributed_systems",
+            "doc_load_balancing",
+            "doc_performance_tuning",
+            "doc_machine_learning",
+            "doc_faiss_intro"
+          ],
+          "relevant_doc_ids": [
+            "doc_big_data",
+            "doc_spark",
+            "doc_distributed_computing"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 0.0,
+              "@10": 0.0
+            },
+            "mrr": 0.0,
+            "ndcg_at_10": 0.0
+          },
+          "latency_ms": 22.67003059387207
+        },
+        {
+          "query_id": "fuzzy_007",
+          "query_text": "代码质量保证措施",
+          "retrieved_doc_ids": [
+            "doc_code_optimization",
+            "doc_low_code",
+            "doc_api_design",
+            "doc_rest_api",
+            "doc_sql_optimization",
+            "doc_performance_tuning",
+            "doc_python_advanced",
+            "db_performance",
+            "doc_deployment",
+            "doc_security"
+          ],
+          "relevant_doc_ids": [
+            "doc_ci_cd",
+            "doc_testing",
+            "doc_code_review"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 0.0,
+              "@10": 0.0
+            },
+            "mrr": 0.0,
+            "ndcg_at_10": 0.0
+          },
+          "latency_ms": 23.29397201538086
+        },
+        {
+          "query_id": "semantic_001",
+          "query_text": "让机器理解人类语言的技术",
+          "retrieved_doc_ids": [
+            "doc_nlp",
+            "doc_machine_learning",
+            "doc_bert",
+            "doc_attention_mechanism",
+            "doc_no_code",
+            "doc_transformer",
+            "doc_low_code",
+            "doc_training_tips",
+            "doc_deployment",
+            "doc_python_advanced"
+          ],
+          "relevant_doc_ids": [
+            "doc_transformer",
+            "doc_nlp",
+            "doc_bert"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.8710785440003369
+          },
+          "latency_ms": 21.305084228515625
+        },
+        {
+          "query_id": "semantic_002",
+          "query_text": "不用写代码就能创建应用的平台",
+          "retrieved_doc_ids": [
+            "doc_no_code",
+            "doc_low_code",
+            "doc_deployment",
+            "doc_python_advanced",
+            "doc_api_design",
+            "doc_rest_api",
+            "doc_code_optimization",
+            "doc_version_control",
+            "doc_bert",
+            "doc_nlp"
+          ],
+          "relevant_doc_ids": [
+            "doc_app_builder",
+            "doc_low_code",
+            "doc_no_code"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 32.984018325805664
+        },
+        {
+          "query_id": "semantic_003",
+          "query_text": "根据用户喜好推荐商品的算法",
+          "retrieved_doc_ids": [
+            "doc_recommendation",
+            "doc_collaborative_filtering",
+            "doc_code_optimization",
+            "db_performance",
+            "doc_sql_optimization",
+            "doc_load_balancing",
+            "doc_rest_api",
+            "doc_api_design",
+            "doc_attention_mechanism",
+            "doc_python_advanced"
+          ],
+          "relevant_doc_ids": [
+            "doc_collaborative_filtering",
+            "doc_matrix_factorization",
+            "doc_recommendation"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 26.449918746948242
+        },
+        {
+          "query_id": "semantic_004",
+          "query_text": "自动发现数据中的模式",
+          "retrieved_doc_ids": [
+            "doc_code_optimization",
+            "db_performance",
+            "doc_attention_mechanism",
+            "doc_machine_learning",
+            "doc_clustering",
+            "doc_faiss_intro",
+            "doc_vector_db",
+            "doc_collaborative_filtering",
+            "doc_sql_optimization",
+            "doc_recommendation"
+          ],
+          "relevant_doc_ids": [
+            "doc_machine_learning",
+            "doc_clustering",
+            "doc_pattern_recognition"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 0.0,
+              "@3": 0.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 0.25,
+            "ndcg_at_10": 0.38364913903790027
+          },
+          "latency_ms": 22.562026977539062
+        },
+        {
+          "query_id": "semantic_005",
+          "query_text": "保护数据不被未授权访问",
+          "retrieved_doc_ids": [
+            "doc_security",
+            "doc_encryption",
+            "doc_no_code",
+            "doc_rest_api",
+            "doc_vector_db",
+            "doc_clustering",
+            "doc_distributed_systems",
+            "db_performance",
+            "doc_sql_optimization",
+            "doc_low_code"
+          ],
+          "relevant_doc_ids": [
+            "doc_authentication",
+            "doc_encryption",
+            "doc_security"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 23.329973220825195
+        },
+        {
+          "query_id": "semantic_006",
+          "query_text": "多台计算机协同工作",
+          "retrieved_doc_ids": [
+            "doc_distributed_systems",
+            "doc_load_balancing",
+            "doc_machine_learning",
+            "db_performance",
+            "doc_gradient_problems",
+            "doc_bert",
+            "doc_low_code",
+            "doc_clustering",
+            "doc_docker",
+            "doc_attention_mechanism"
+          ],
+          "relevant_doc_ids": [
+            "doc_cluster_computing",
+            "doc_distributed_systems",
+            "doc_load_balancing"
+          ],
+          "metrics": {
+            "hit_rate_at_k": {
+              "@1": 1.0,
+              "@3": 1.0,
+              "@5": 1.0,
+              "@10": 1.0
+            },
+            "mrr": 1.0,
+            "ndcg_at_10": 0.7653606369886217
+          },
+          "latency_ms": 23.493051528930664
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,431 @@
+{
+  "timestamp": "2026-03-24T20:07:05.687176",
+  "summary": {
+    "total_cases": 5,
+    "total_turns": 32
+  },
+  "results": [
+    {
+      "case_id": "code_debug_001",
+      "session_id": "8f19cb50-aa0f-41ee-a429-443f8f2ba4e9",
+      "metrics": {
+        "overall_coherence": 0.5833,
+        "anaphora_accuracy": 0.5,
+        "context_retention": 1.0,
+        "topic_switch_handling": 0.5,
+        "info_fusion_quality": 1.0,
+        "avg_latency_ms": 0.0
+      },
+      "turns": [
+        {
+          "turn_id": 1,
+          "question": "Python中列表推导式是什么？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 1.0,
+          "coherence_score": 1.0,
+          "issues": [],
+          "latency_ms": 0.009059906005859375
+        },
+        {
+          "turn_id": 2,
+          "question": "它和普通for循环有什么区别？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 3,
+          "question": "上面的代码在什么情况下会报错？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0016689300537109375
+        },
+        {
+          "turn_id": 4,
+          "question": "那应该用什么替代？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.3333333333333333,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 5,
+          "question": "Java里有类似的特性吗？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "topic_switch",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 1.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 6,
+          "question": "回到Python，刚才说的生成器怎么写？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "topic_switch",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0019073486328125
+        }
+      ]
+    },
+    {
+      "case_id": "api_design_001",
+      "session_id": "09f92413-0c1b-4130-be3c-b7fb20cf2c50",
+      "metrics": {
+        "overall_coherence": 0.5714,
+        "anaphora_accuracy": 0.5,
+        "context_retention": 0.3333,
+        "topic_switch_handling": 0.5,
+        "info_fusion_quality": 0.0,
+        "avg_latency_ms": 0.0
+      },
+      "turns": [
+        {
+          "turn_id": 1,
+          "question": "设计一个用户注册API需要注意什么？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 1.0,
+          "coherence_score": 1.0,
+          "issues": [],
+          "latency_ms": 0.0019073486328125
+        },
+        {
+          "turn_id": 2,
+          "question": "密码应该怎么处理？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0030994415283203125
+        },
+        {
+          "turn_id": 3,
+          "question": "除了密码，还有哪些字段需要验证？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "info_completion",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0030994415283203125
+        },
+        {
+          "turn_id": 4,
+          "question": "验证失败应该返回什么状态码？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.25,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 5,
+          "question": "前面提到的这些安全措施，在登录API中也适用吗？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.00095367431640625
+        },
+        {
+          "turn_id": 6,
+          "question": "如果我想支持第三方登录呢？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "topic_switch",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0019073486328125
+        },
+        {
+          "turn_id": 7,
+          "question": "总结一下，注册和登录API的关键区别是什么？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "info_completion",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0019073486328125
+        }
+      ]
+    },
+    {
+      "case_id": "concept_001",
+      "session_id": "d2521683-ebc3-44f4-a6c5-a7901c79d351",
+      "metrics": {
+        "overall_coherence": 0.6,
+        "anaphora_accuracy": 0.5,
+        "context_retention": 0.5,
+        "topic_switch_handling": 1.0,
+        "info_fusion_quality": 1.0,
+        "avg_latency_ms": 0.0
+      },
+      "turns": [
+        {
+          "turn_id": 1,
+          "question": "什么是微服务架构？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 1.0,
+          "coherence_score": 1.0,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 2,
+          "question": "它和单体架构相比有什么优缺点？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 3,
+          "question": "服务之间怎么通信？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0019073486328125
+        },
+        {
+          "turn_id": 4,
+          "question": "这种通信方式有什么缺点？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 5,
+          "question": "如何解决这些问题？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0016689300537109375
+        }
+      ]
+    },
+    {
+      "case_id": "troubleshoot_001",
+      "session_id": "68a1e6a8-6b62-41ac-b98d-bfd98d32001d",
+      "metrics": {
+        "overall_coherence": 0.5625,
+        "anaphora_accuracy": 0.5,
+        "context_retention": 0.25,
+        "topic_switch_handling": 1.0,
+        "info_fusion_quality": 0.0,
+        "avg_latency_ms": 0.0
+      },
+      "turns": [
+        {
+          "turn_id": 1,
+          "question": "数据库查询很慢，可能是什么原因？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 1.0,
+          "coherence_score": 1.0,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 2,
+          "question": "怎么查看哪些查询慢？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.00095367431640625
+        },
+        {
+          "turn_id": 3,
+          "question": "找到慢查询后怎么处理？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.00095367431640625
+        },
+        {
+          "turn_id": 4,
+          "question": "加了索引还是慢怎么办？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "info_completion",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.00095367431640625
+        },
+        {
+          "turn_id": 5,
+          "question": "数据量大概多少需要考虑分库分表？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 6,
+          "question": "分表后怎么保证跨表查询的性能？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.00095367431640625
+        },
+        {
+          "turn_id": 7,
+          "question": "除了刚才说的这些，还有什么优化手段？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0011920928955078125
+        },
+        {
+          "turn_id": 8,
+          "question": "能给我一个完整的排查流程吗？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "info_completion",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0011920928955078125
+        }
+      ]
+    },
+    {
+      "case_id": "arch_001",
+      "session_id": "fe73e68e-6895-41ca-b26d-7b16fd633251",
+      "metrics": {
+        "overall_coherence": 0.5833,
+        "anaphora_accuracy": 0.5,
+        "context_retention": 0.5,
+        "topic_switch_handling": 0.5,
+        "info_fusion_quality": 1.0,
+        "avg_latency_ms": 0.0
+      },
+      "turns": [
+        {
+          "turn_id": 1,
+          "question": "Redis和Memcached有什么区别？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 1.0,
+          "coherence_score": 1.0,
+          "issues": [],
+          "latency_ms": 0.013113021850585938
+        },
+        {
+          "turn_id": 2,
+          "question": "什么情况下选前者？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.00095367431640625
+        },
+        {
+          "turn_id": 3,
+          "question": "缓存穿透怎么解决？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "context",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        },
+        {
+          "turn_id": 4,
+          "question": "那缓存击穿呢？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.00095367431640625
+        },
+        {
+          "turn_id": 5,
+          "question": "回到Redis，它的持久化机制有哪些？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "topic_switch",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.00095367431640625
+        },
+        {
+          "turn_id": 6,
+          "question": "这两种持久化方式各有什么优缺点？",
+          "answer": "错误: 'generator' object has no attribute 'get'",
+          "evaluation_type": "anaphora",
+          "keyword_match_rate": 0.0,
+          "context_reference_score": 0.0,
+          "coherence_score": 0.5,
+          "issues": [],
+          "latency_ms": 0.0021457672119140625
+        }
+      ]
+    }
+  ]
+}

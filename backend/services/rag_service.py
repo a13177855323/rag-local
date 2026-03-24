@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 import os
 import time
 from backend.config import settings
@@ -89,6 +89,19 @@ class RAGService:
             } for doc, score in search_results
         ]
 
+        # 流式输出 - 始终通过内部generator函数处理
+        if stream:
+            return self._stream_query(question, context, sources, session_id, start_time)
+        
+        # 非流式输出
+        return self._normal_query(question, context, sources, session_id, start_time)
+
+    def _normal_query(self, question: str, context: List[str], sources: List[Dict], 
+                     session_id: str = None, start_time: float = None):
+        """非流式查询处理"""
+        if start_time is None:
+            start_time = time.time()
+            
         if not context:
             response_time = int((time.time() - start_time) * 1000)
             answer = "知识库中没有找到相关文档，请先上传文档。"
@@ -104,56 +117,42 @@ class RAGService:
                     is_code_query=False
                 )
 
-            result = {
+            return {
                 "answer": answer,
                 "sources": [],
                 "session_id": session_id
             }
-            if stream:
-                yield result
-            else:
-                return result
-            return
-
+        
         # 生成回答
-        if stream:
-            # 流式输出
-            def stream_response():
-                full_response = ""
-                start = time.time()
+        answer = self.llm_model.generate(question, context)
+        response_time = int((time.time() - start_time) * 1000)
 
-                for chunk in self.llm_model.generate_stream(question, context):
-                    full_response += chunk
-                    yield {
-                        "answer": chunk,
-                        "done": False,
-                        "sources": sources,
-                        "session_id": session_id
-                    }
+        # 记录对话
+        if session_id:
+            self.conversation_store.add_turn(
+                session_id=session_id,
+                question=question,
+                answer=answer,
+                sources=sources,
+                response_time_ms=response_time,
+                is_code_query=False
+            )
 
-                response_time = int((time.time() - start) * 1000)
+        return {
+            "answer": answer,
+            "sources": sources,
+            "session_id": session_id
+        }
 
-                # 记录对话
-                if session_id:
-                    self.conversation_store.add_turn(
-                        session_id=session_id,
-                        question=question,
-                        answer=full_response,
-                        sources=sources,
-                        response_time_ms=response_time,
-                        is_code_query=False
-                    )
-
-                yield {
-                    "answer": "",
-                    "done": True,
-                    "sources": sources,
-                    "session_id": session_id
-                }
-            return stream_response()
-        else:
-            answer = self.llm_model.generate(question, context)
+    def _stream_query(self, question: str, context: List[str], sources: List[Dict], 
+                      session_id: str = None, start_time: float = None):
+        """流式查询处理"""
+        if start_time is None:
+            start_time = time.time()
+            
+        if not context:
             response_time = int((time.time() - start_time) * 1000)
+            answer = "知识库中没有找到相关文档，请先上传文档。"
 
             # 记录对话
             if session_id:
@@ -161,16 +160,51 @@ class RAGService:
                     session_id=session_id,
                     question=question,
                     answer=answer,
-                    sources=sources,
+                    sources=[],
                     response_time_ms=response_time,
                     is_code_query=False
                 )
 
-            return {
+            yield {
                 "answer": answer,
+                "done": True,
+                "sources": [],
+                "session_id": session_id
+            }
+            return
+
+        # 流式输出
+        full_response = ""
+        start = time.time()
+
+        for chunk in self.llm_model.generate_stream(question, context):
+            full_response += chunk
+            yield {
+                "answer": chunk,
+                "done": False,
                 "sources": sources,
                 "session_id": session_id
             }
+
+        response_time = int((time.time() - start) * 1000)
+
+        # 记录对话
+        if session_id:
+            self.conversation_store.add_turn(
+                session_id=session_id,
+                question=question,
+                answer=full_response,
+                sources=sources,
+                response_time_ms=response_time,
+                is_code_query=False
+            )
+
+        yield {
+            "answer": "",
+            "done": True,
+            "sources": sources,
+            "session_id": session_id
+        }
 
     def get_document_list(self) -> List[str]:
         """获取已上传的文档列表"""

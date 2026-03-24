@@ -11,8 +11,15 @@ class VectorStore:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._initialize()
+            cls._instance._initialized = False
         return cls._instance
+    
+    def __init__(self):
+        """初始化（单例模式，只执行一次）"""
+        if self._initialized:
+            return
+        self._initialize()
+        self._initialized = True
 
     def _initialize(self):
         """初始化向量数据库"""
@@ -23,11 +30,23 @@ class VectorStore:
         if os.path.exists(self.index_path) and os.path.exists(self.metadata_path):
             self._load_index()
         else:
-            self._create_index()
+            # 尝试从embedding_model获取维度
+            dimension = self._get_embedding_dimension()
+            self._create_index(dimension)
+    
+    def _get_embedding_dimension(self) -> int:
+        """获取嵌入维度"""
+        try:
+            from backend.models.embedding_model import EmbeddingModel
+            model = EmbeddingModel()
+            return model.dimension
+        except:
+            return settings.VECTOR_DIMENSION
 
-    def _create_index(self):
+    def _create_index(self, dimension: int = None):
         """创建新的FAISS索引"""
-        dimension = settings.VECTOR_DIMENSION
+        if dimension is None:
+            dimension = settings.VECTOR_DIMENSION
         # 使用HNSW索引以提高检索速度
         self.index = faiss.IndexHNSWFlat(dimension, 32, faiss.METRIC_INNER_PRODUCT)
         # 存储元数据

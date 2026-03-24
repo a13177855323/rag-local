@@ -1,0 +1,595 @@
+[
+  {
+    "scenario_id": "coref_001",
+    "scenario_name": "代码指代消解测试",
+    "scenario_type": "指代消解",
+    "description": "测试系统对代码相关指代词的理解能力",
+    "turns": [
+      {
+        "turn_id": 1,
+        "question": "什么是Python中的装饰器？",
+        "expected_keywords": [
+          "装饰器",
+          "decorator",
+          "@",
+          "函数"
+        ],
+        "expected_context_refs": [],
+        "scenario_type": "指代消解",
+        "description": "首次提问，建立上下文"
+      },
+      {
+        "turn_id": 2,
+        "question": "它有什么作用？",
+        "expected_keywords": [
+          "装饰器",
+          "功能",
+          "作用",
+          "修改",
+          "扩展"
+        ],
+        "expected_context_refs": [
+          "装饰器"
+        ],
+        "scenario_type": "指代消解",
+        "description": "测试'它'指代'装饰器'"
+      },
+      {
+        "turn_id": 3,
+        "question": "能给个例子吗？",
+        "expected_keywords": [
+          "@",
+          "def",
+          "例子",
+          "示例",
+          "代码"
+        ],
+        "expected_context_refs": [
+          "装饰器",
+          "例子"
+        ],
+        "scenario_type": "指代消解",
+        "description": "测试省略主语的指代"
+      },
+      {
+        "turn_id": 4,
+        "question": "这个例子中的@符号是什么意思？",
+        "expected_keywords": [
+          "@",
+          "语法",
+          "装饰器",
+          "应用"
+        ],
+        "expected_context_refs": [
+          "例子",
+          "@"
+        ],
+        "scenario_type": "指代消解",
+        "description": "测试'这个例子'的指代"
+      },
+      {
+        "turn_id": 5,
+        "question": "前者可以被多个函数使用吗？",
+        "expected_keywords": [
+          "装饰器",
+          "多个",
+          "函数",
+          "复用"
+        ],
+        "expected_context_refs": [
+          "装饰器"
+        ],
+        "scenario_type": "指代消解",
+        "description": "测试'前者'指代'装饰器'"
+      }
+    ],
+    "expected_flow": [
+      "装饰器定义",
+      "作用说明",
+      "示例展示",
+      "语法解释",
+      "复用性"
+    ]
+  },
+  {
+    "scenario_id": "coref_002",
+    "scenario_name": "概念指代消解测试",
+    "scenario_type": "指代消解",
+    "description": "测试系统对概念性指代词的理解",
+    "turns": [
+      {
+        "turn_id": 1,
+        "question": "什么是向量数据库？",
+        "expected_keywords": [
+          "向量",
+          "数据库",
+          "存储",
+          "检索"
+        ],
+        "expected_context_refs": [],
+        "scenario_type": "指代消解",
+        "description": "建立向量数据库概念"
+      },
+      {
+        "turn_id": 2,
+        "question": "它与传统的SQL数据库有什么区别？",
+        "expected_keywords": [
+          "区别",
+          "SQL",
+          "向量",
+          "检索",
+          "结构化"
+        ],
+        "expected_context_refs": [
+          "向量数据库",
+          "SQL数据库"
+        ],
+        "scenario_type": "指代消解",
+        "description": "测试'它'指代'向量数据库'"
+      },
+      {
+        "turn_id": 3,
+        "question": "上述区别在实际应用中有什么影响？",
+        "expected_keywords": [
+          "应用",
+          "影响",
+          "场景",
+          "性能"
+        ],
+        "expected_context_refs": [
+          "区别"
+        ],
+        "scenario_type": "指代消解",
+        "description": "测试'上述区别'的指代"
+      }
+    ],
+    "expected_flow": [
+      "概念定义",
+      "对比分析",
+      "应用影响"
+    ]
+  },
+  {
+    "scenario_id": "ctx_001",
+    "scenario_name": "代码上下文关联测试",
+    "scenario_type": "上下文关联",
+    "description": "测试系统对代码相关上下文的理解和关联能力",
+    "turns": [
+      {
+        "turn_id": 1,
+        "question": "如何在Python中读取文件？",
+        "expected_keywords": [
+          "open",
+          "read",
+          "文件",
+          "Python"
+        ],
+        "expected_context_refs": [],
+        "scenario_type": "上下文关联",
+        "description": "建立文件操作上下文"
+      },
+      {
+        "turn_id": 2,
+        "question": "读取大文件时有什么注意事项？",
+        "expected_keywords": [
+          "大文件",
+          "内存",
+          "缓冲",
+          "逐行",
+          "chunk"
+        ],
+        "expected_context_refs": [
+          "读取文件"
+        ],
+        "scenario_type": "上下文关联",
+        "description": "基于之前内容深入提问"
+      },
+      {
+        "turn_id": 3,
+        "question": "如果文件不存在会发生什么？",
+        "expected_keywords": [
+          "异常",
+          "FileNotFoundError",
+          "错误",
+          "处理"
+        ],
+        "expected_context_refs": [
+          "文件",
+          "读取"
+        ],
+        "scenario_type": "上下文关联",
+        "description": "测试异常情况理解"
+      },
+      {
+        "turn_id": 4,
+        "question": "如何优雅地处理这种情况？",
+        "expected_keywords": [
+          "try",
+          "except",
+          "处理",
+          "优雅"
+        ],
+        "expected_context_refs": [
+          "异常",
+          "文件不存在"
+        ],
+        "scenario_type": "上下文关联",
+        "description": "测试'这种情况'指代异常"
+      },
+      {
+        "turn_id": 5,
+        "question": "with语句能解决前面提到的问题吗？",
+        "expected_keywords": [
+          "with",
+          "上下文管理",
+          "自动关闭",
+          "资源"
+        ],
+        "expected_context_refs": [
+          "问题",
+          "文件操作"
+        ],
+        "scenario_type": "上下文关联",
+        "description": "测试'前面提到的问题'关联"
+      }
+    ],
+    "expected_flow": [
+      "基础操作",
+      "进阶注意",
+      "异常处理",
+      "优雅方案",
+      "with语句"
+    ]
+  },
+  {
+    "scenario_id": "ctx_002",
+    "scenario_name": "RAG系统上下文关联测试",
+    "scenario_type": "上下文关联",
+    "description": "测试RAG相关概念的上下文关联",
+    "turns": [
+      {
+        "turn_id": 1,
+        "question": "RAG系统是如何工作的？",
+        "expected_keywords": [
+          "检索",
+          "生成",
+          "RAG",
+          "文档",
+          "向量"
+        ],
+        "expected_context_refs": [],
+        "scenario_type": "上下文关联",
+        "description": "建立RAG概念"
+      },
+      {
+        "turn_id": 2,
+        "question": "检索阶段使用什么技术？",
+        "expected_keywords": [
+          "向量",
+          "检索",
+          "相似度",
+          "embedding"
+        ],
+        "expected_context_refs": [
+          "RAG",
+          "检索"
+        ],
+        "scenario_type": "上下文关联",
+        "description": "深入检索阶段"
+      },
+      {
+        "turn_id": 3,
+        "question": "生成阶段呢？",
+        "expected_keywords": [
+          "生成",
+          "LLM",
+          "上下文",
+          "回答"
+        ],
+        "expected_context_refs": [
+          "RAG",
+          "生成"
+        ],
+        "scenario_type": "上下文关联",
+        "description": "测试'呢'省略关联"
+      },
+      {
+        "turn_id": 4,
+        "question": "这两个阶段如何配合？",
+        "expected_keywords": [
+          "配合",
+          "检索",
+          "生成",
+          "流程"
+        ],
+        "expected_context_refs": [
+          "检索阶段",
+          "生成阶段"
+        ],
+        "scenario_type": "上下文关联",
+        "description": "测试'这两个阶段'指代"
+      }
+    ],
+    "expected_flow": [
+      "整体流程",
+      "检索详解",
+      "生成详解",
+      "阶段配合"
+    ]
+  },
+  {
+    "scenario_id": "topic_001",
+    "scenario_name": "主题切换回归测试",
+    "scenario_type": "主题切换与回归",
+    "description": "测试系统在主题切换后能否正确回归之前话题",
+    "turns": [
+      {
+        "turn_id": 1,
+        "question": "什么是机器学习？",
+        "expected_keywords": [
+          "机器学习",
+          "学习",
+          "数据",
+          "模型"
+        ],
+        "expected_context_refs": [],
+        "scenario_type": "主题切换与回归",
+        "description": "建立机器学习主题"
+      },
+      {
+        "turn_id": 2,
+        "question": "它有哪些主要类型？",
+        "expected_keywords": [
+          "监督",
+          "无监督",
+          "强化",
+          "类型"
+        ],
+        "expected_context_refs": [
+          "机器学习"
+        ],
+        "scenario_type": "主题切换与回归",
+        "description": "深入机器学习"
+      },
+      {
+        "turn_id": 3,
+        "question": "顺便问一下，Python中如何定义类？",
+        "expected_keywords": [
+          "class",
+          "Python",
+          "定义",
+          "类"
+        ],
+        "expected_context_refs": [],
+        "scenario_type": "主题切换与回归",
+        "description": "主题切换到Python"
+      },
+      {
+        "turn_id": 4,
+        "question": "类的继承怎么实现？",
+        "expected_keywords": [
+          "继承",
+          "class",
+          "父类",
+          "子类"
+        ],
+        "expected_context_refs": [
+          "类",
+          "Python"
+        ],
+        "scenario_type": "主题切换与回归",
+        "description": "继续Python主题"
+      },
+      {
+        "turn_id": 5,
+        "question": "回到之前的话题，监督学习和无监督学习的区别是什么？",
+        "expected_keywords": [
+          "监督",
+          "无监督",
+          "区别",
+          "标签"
+        ],
+        "expected_context_refs": [
+          "机器学习",
+          "监督学习",
+          "无监督学习"
+        ],
+        "scenario_type": "主题切换与回归",
+        "description": "回归机器学习主题"
+      },
+      {
+        "turn_id": 6,
+        "question": "刚才说的第一种类型适合什么场景？",
+        "expected_keywords": [
+          "监督学习",
+          "场景",
+          "分类",
+          "回归"
+        ],
+        "expected_context_refs": [
+          "监督学习",
+          "第一种类型"
+        ],
+        "scenario_type": "主题切换与回归",
+        "description": "测试'刚才说的'和'第一种类型'"
+      }
+    ],
+    "expected_flow": [
+      "机器学习",
+      "类型",
+      "Python类",
+      "继承",
+      "回归ML",
+      "场景"
+    ]
+  },
+  {
+    "scenario_id": "info_001",
+    "scenario_name": "代码信息补全测试",
+    "scenario_type": "信息补全",
+    "description": "测试系统基于已有信息补全后续回答的能力",
+    "turns": [
+      {
+        "turn_id": 1,
+        "question": "我有一个包含用户信息的字典：{'name': '张三', 'age': 25}",
+        "expected_keywords": [
+          "字典",
+          "用户",
+          "信息"
+        ],
+        "expected_context_refs": [],
+        "scenario_type": "信息补全",
+        "description": "提供初始信息"
+      },
+      {
+        "turn_id": 2,
+        "question": "如何获取用户的名字？",
+        "expected_keywords": [
+          "name",
+          "张三",
+          "获取",
+          "字典"
+        ],
+        "expected_context_refs": [
+          "字典",
+          "用户信息"
+        ],
+        "scenario_type": "信息补全",
+        "description": "基于已有信息回答"
+      },
+      {
+        "turn_id": 3,
+        "question": "如果要添加一个新的字段'city'，应该怎么做？",
+        "expected_keywords": [
+          "city",
+          "添加",
+          "字典",
+          "键值"
+        ],
+        "expected_context_refs": [
+          "字典",
+          "用户信息"
+        ],
+        "scenario_type": "信息补全",
+        "description": "扩展已有信息"
+      },
+      {
+        "turn_id": 4,
+        "question": "现在这个字典有哪些键？",
+        "expected_keywords": [
+          "name",
+          "age",
+          "city",
+          "键"
+        ],
+        "expected_context_refs": [
+          "字典",
+          "name",
+          "age",
+          "city"
+        ],
+        "scenario_type": "信息补全",
+        "description": "测试信息融合"
+      },
+      {
+        "turn_id": 5,
+        "question": "如何遍历这个字典的所有键值对？",
+        "expected_keywords": [
+          "遍历",
+          "items",
+          "for",
+          "键值对"
+        ],
+        "expected_context_refs": [
+          "字典"
+        ],
+        "scenario_type": "信息补全",
+        "description": "基于完整信息操作"
+      }
+    ],
+    "expected_flow": [
+      "初始信息",
+      "获取操作",
+      "添加操作",
+      "信息确认",
+      "遍历操作"
+    ]
+  },
+  {
+    "scenario_id": "info_002",
+    "scenario_name": "配置信息补全测试",
+    "scenario_type": "信息补全",
+    "description": "测试系统对配置信息的记忆和补全",
+    "turns": [
+      {
+        "turn_id": 1,
+        "question": "我正在配置一个RAG系统，向量维度是1024，使用FAISS索引",
+        "expected_keywords": [
+          "RAG",
+          "向量",
+          "1024",
+          "FAISS"
+        ],
+        "expected_context_refs": [],
+        "scenario_type": "信息补全",
+        "description": "提供配置信息"
+      },
+      {
+        "turn_id": 2,
+        "question": "基于这个配置，我应该选择什么嵌入模型？",
+        "expected_keywords": [
+          "嵌入",
+          "模型",
+          "1024",
+          "维度"
+        ],
+        "expected_context_refs": [
+          "1024",
+          "向量维度"
+        ],
+        "scenario_type": "信息补全",
+        "description": "基于配置推荐"
+      },
+      {
+        "turn_id": 3,
+        "question": "如果我想把top_k设置为5，需要修改哪里？",
+        "expected_keywords": [
+          "top_k",
+          "5",
+          "配置",
+          "检索"
+        ],
+        "expected_context_refs": [
+          "RAG系统",
+          "配置"
+        ],
+        "scenario_type": "信息补全",
+        "description": "扩展配置"
+      },
+      {
+        "turn_id": 4,
+        "question": "总结一下我目前的配置",
+        "expected_keywords": [
+          "1024",
+          "FAISS",
+          "top_k",
+          "5",
+          "向量"
+        ],
+        "expected_context_refs": [
+          "向量维度",
+          "FAISS",
+          "top_k"
+        ],
+        "scenario_type": "信息补全",
+        "description": "测试信息融合"
+      }
+    ],
+    "expected_flow": [
+      "初始配置",
+      "模型推荐",
+      "配置扩展",
+      "配置总结"
+    ]
+  }
+]
